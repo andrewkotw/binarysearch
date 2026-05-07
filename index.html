@@ -1,0 +1,3181 @@
+<!doctype html>
+<html lang="zh-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>搜尋演算法互動教室</title>
+    <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+    <style>
+      /* =========================================
+   探索講義風格 CSS
+   厚線框 / 米白紙感 / 教學卡片 / 手作感
+   ========================================= */
+
+      :root {
+        --bg-color: #f4efe3;
+        --paper: #fffaf0;
+        --card-bg: #fffdf7;
+
+        --text-main: #22313a;
+        --text-light: #607c8b;
+        --line: #20323b;
+
+        --primary: #2f6f88;
+        --primary-hover: #24596d;
+
+        --green: #a9ddb0;
+        --blue: #91cdf2;
+        --yellow: #ffe095;
+        --pink: #f4b5c5;
+        --cream: #fff4bf;
+
+        --color-checking-bg: #ffe095;
+        --color-checking-border: #20323b;
+        --color-found-bg: #b9e7b8;
+        --color-found-border: #20323b;
+        --color-exclude-bg: #eee7d8;
+        --color-exclude-text: #9aa2a6;
+        --color-error: #c94a4a;
+
+        --color-pointer-l: #2f6f88;
+        --color-pointer-m: #8b5fbf;
+        --color-pointer-h: #d47a38;
+
+        --radius-md: 16px;
+        --radius-lg: 26px;
+
+        --shadow-sm: 3px 3px 0 rgba(32, 50, 59, 0.18);
+        --shadow-md: 5px 6px 0 rgba(32, 50, 59, 0.18);
+        --shadow-lg: 8px 9px 0 rgba(32, 50, 59, 0.2);
+      }
+
+      /* =========================================
+   基礎設定
+   ========================================= */
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        font-family: "Noto Sans TC", "Microsoft JhengHei", "PingFang TC", "Segoe UI", sans-serif;
+        background:
+          radial-gradient(circle at 12% 8%, rgba(255, 224, 149, 0.4) 0 8%, transparent 9%), radial-gradient(circle at 90% 12%, rgba(244, 181, 197, 0.35) 0 9%, transparent 10%),
+          radial-gradient(circle at 85% 80%, rgba(145, 205, 242, 0.28) 0 12%, transparent 13%), var(--bg-color);
+        color: var(--text-main);
+        line-height: 1.8;
+        letter-spacing: 0.02em;
+      }
+
+      .container {
+        max-width: 1180px;
+        margin: 0 auto;
+        padding: 32px 20px 56px;
+      }
+
+      /* =========================================
+   開場 Header
+   ========================================= */
+
+      header {
+        position: relative;
+        overflow: hidden;
+        text-align: center;
+        margin-bottom: 36px;
+        padding: 44px 42px;
+        background: var(--paper);
+        border: 4px solid var(--line);
+        border-radius: 32px;
+        box-shadow: var(--shadow-lg);
+      }
+
+      header::before {
+        content: "";
+        position: absolute;
+        right: -42px;
+        top: -58px;
+        width: 190px;
+        height: 190px;
+        background: var(--yellow);
+        border-radius: 50%;
+        opacity: 0.95;
+      }
+
+      header::after {
+        content: "";
+        position: absolute;
+        left: -48px;
+        bottom: -64px;
+        width: 150px;
+        height: 150px;
+        background: var(--blue);
+        border-radius: 50%;
+        opacity: 0.45;
+      }
+
+      h1 {
+        position: relative;
+        z-index: 1;
+        font-size: clamp(2rem, 5vw, 3.8rem);
+        line-height: 1.15;
+        color: var(--text-main);
+        margin-bottom: 14px;
+        font-weight: 900;
+      }
+
+      .subtitle {
+        position: relative;
+        z-index: 1;
+        max-width: 760px;
+        font-size: 1.18rem;
+        color: var(--text-light);
+        margin-bottom: 28px;
+        font-weight: 700;
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      .analogy-box {
+        position: relative;
+        z-index: 1;
+        background: #ffffff;
+        padding: 22px 24px;
+        border-radius: 22px;
+        max-width: 820px;
+        margin: 0 auto 28px;
+        font-size: 1.05rem;
+        border: 3px solid var(--line);
+        box-shadow: var(--shadow-sm);
+        text-align: left;
+      }
+
+      header > div:last-child {
+        position: relative;
+        z-index: 1;
+        justify-content: center !important;
+      }
+
+      /* =========================================
+   Section：像講義大卡片
+   ========================================= */
+
+      section {
+        position: relative;
+        overflow: hidden;
+        background: var(--paper);
+        border: 4px solid var(--line);
+        border-radius: 30px;
+        padding: 38px;
+        margin-bottom: 36px;
+        box-shadow: var(--shadow-md);
+      }
+
+      section::before {
+        content: "";
+        position: absolute;
+        right: -34px;
+        top: -44px;
+        width: 140px;
+        height: 140px;
+        background: var(--blue);
+        border-radius: 50%;
+        opacity: 0.55;
+      }
+
+      section:nth-of-type(2)::before {
+        background: var(--green);
+      }
+
+      section:nth-of-type(3)::before {
+        background: var(--pink);
+      }
+
+      section:nth-of-type(4)::before {
+        background: var(--yellow);
+      }
+
+      section:nth-of-type(5)::before {
+        background: var(--green);
+      }
+
+      section:nth-of-type(6)::before {
+        background: var(--blue);
+      }
+
+      section:nth-of-type(7)::before {
+        background: var(--pink);
+      }
+
+      h2 {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        font-size: clamp(1.7rem, 3vw, 2.4rem);
+        color: var(--text-main);
+        margin-bottom: 18px;
+        padding-bottom: 0;
+        border-bottom: none;
+        font-weight: 900;
+      }
+
+      h2::before {
+        content: "";
+        flex: 0 0 auto;
+        width: 28px;
+        height: 28px;
+        border-radius: 999px;
+        background: var(--line);
+        box-shadow: inset 0 0 0 8px var(--line);
+      }
+
+      h3 {
+        position: relative;
+        z-index: 1;
+        font-size: 1.35rem;
+        margin-bottom: 10px;
+        color: var(--text-main);
+        font-weight: 900;
+      }
+
+      p {
+        position: relative;
+        z-index: 1;
+        margin-bottom: 18px;
+        font-size: 1.05rem;
+      }
+
+      /* =========================================
+   按鈕：厚框探索按鈕
+   ========================================= */
+
+      .btn {
+        background-color: var(--cream);
+        color: var(--text-main);
+        border: 3px solid var(--line);
+        padding: 0.75rem 1.25rem;
+        font-size: 1rem;
+        border-radius: 999px;
+        cursor: pointer;
+        transition:
+          transform 0.12s ease,
+          box-shadow 0.12s ease,
+          background-color 0.12s ease;
+        font-weight: 900;
+        text-decoration: none;
+        display: inline-block;
+        box-shadow: 3px 4px 0 rgba(32, 50, 59, 0.25);
+      }
+
+      .btn:hover:not(:disabled) {
+        background-color: #fff0a8;
+        transform: translate(-1px, -2px);
+        box-shadow: 5px 6px 0 rgba(32, 50, 59, 0.25);
+      }
+
+      .btn:active:not(:disabled) {
+        transform: translate(1px, 2px);
+        box-shadow: 1px 2px 0 rgba(32, 50, 59, 0.25);
+      }
+
+      .btn:disabled {
+        background-color: #e4ded0;
+        color: #9aa2a6;
+        cursor: not-allowed;
+        opacity: 0.75;
+        box-shadow: none;
+      }
+
+      .btn-outline {
+        background-color: #ffffff;
+        border: 3px solid var(--line);
+        color: var(--text-main);
+      }
+
+      .btn-outline:hover:not(:disabled) {
+        background-color: #f9f2df;
+      }
+
+      .btn-green {
+        background-color: var(--green);
+      }
+
+      .btn-green:hover:not(:disabled) {
+        background-color: #98d6a0;
+      }
+
+      /* =========================================
+   控制區
+   ========================================= */
+
+      .controls {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        gap: 14px;
+        align-items: center;
+        flex-wrap: wrap;
+        margin: 24px 0;
+        background: #ffffff;
+        padding: 18px;
+        border-radius: 22px;
+        border: 3px solid var(--line);
+        box-shadow: var(--shadow-sm);
+      }
+
+      .controls label {
+        font-weight: 900;
+        color: var(--text-main);
+      }
+
+      .controls input[type="range"] {
+        cursor: pointer;
+        width: 130px;
+        accent-color: var(--primary);
+      }
+
+      input[type="number"],
+      select {
+        padding: 0.65rem 0.75rem;
+        border: 3px solid var(--line);
+        border-radius: 14px;
+        font-size: 1rem;
+        width: 108px;
+        background: #fffdf7;
+        color: var(--text-main);
+        font-weight: 800;
+      }
+
+      select {
+        width: auto;
+      }
+
+      input[type="number"]:focus,
+      select:focus {
+        outline: 4px solid rgba(145, 205, 242, 0.55);
+      }
+
+      /* =========================================
+   訊息區
+   ========================================= */
+
+      .message-area {
+        position: relative;
+        z-index: 1;
+        min-height: 3.4rem;
+        padding: 16px 18px;
+        margin-bottom: 22px;
+        border-radius: 20px;
+        background-color: #ffffff;
+        border: 3px solid var(--line);
+        font-weight: 900;
+        font-size: 1.08rem;
+        text-align: center;
+        transition: all 0.25s;
+        box-shadow: var(--shadow-sm);
+      }
+
+      .msg-info {
+        color: var(--text-main);
+      }
+
+      .msg-success {
+        background-color: var(--color-found-bg);
+        color: #1f5f32;
+        border-color: var(--line);
+      }
+
+      .msg-error {
+        background-color: #ffd8d5;
+        color: var(--color-error);
+        border-color: var(--line);
+      }
+
+      /* =========================================
+   陣列卡片
+   ========================================= */
+
+      .array-container {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16px;
+        justify-content: center;
+        margin: 30px 0 38px;
+        min-height: 108px;
+      }
+
+      .array-item-wrapper {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .card {
+        width: 58px;
+        height: 58px;
+        background-color: #ffffff;
+        border: 3px solid var(--line);
+        border-radius: 18px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 1.25rem;
+        font-weight: 900;
+        color: var(--text-main);
+        box-shadow: 3px 4px 0 rgba(32, 50, 59, 0.18);
+        transition: all 0.25s ease;
+        position: relative;
+      }
+
+      .card-index {
+        font-size: 0.78rem;
+        color: var(--text-light);
+        font-weight: 800;
+      }
+
+      .card.checking {
+        background-color: var(--color-checking-bg);
+        border-color: var(--line);
+        transform: scale(1.12) rotate(-2deg);
+        box-shadow: 5px 6px 0 rgba(32, 50, 59, 0.25);
+        z-index: 10;
+      }
+
+      .card.found {
+        background-color: var(--color-found-bg);
+        border-color: var(--line);
+        transform: scale(1.14) rotate(2deg);
+        box-shadow:
+          0 0 0 5px rgba(185, 231, 184, 0.55),
+          5px 6px 0 rgba(32, 50, 59, 0.25);
+        z-index: 10;
+      }
+
+      .card.excluded {
+        background-color: var(--color-exclude-bg);
+        border-color: #cfc7b8;
+        color: var(--color-exclude-text);
+        opacity: 0.45;
+        transform: scale(0.94);
+        box-shadow: none;
+      }
+
+      /* =========================================
+   Binary Search 指標
+   ========================================= */
+
+      .pointer-area {
+        height: 74px;
+        font-weight: 900;
+        font-size: 0.78rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 3px;
+      }
+
+      .pointer {
+        min-width: 24px;
+        text-align: center;
+        padding: 2px 6px;
+        border-radius: 999px;
+        color: white;
+        border: 2px solid var(--line);
+        opacity: 0;
+        transition:
+          opacity 0.2s,
+          transform 0.2s;
+      }
+
+      .pointer.show {
+        opacity: 1;
+        transform: translateY(-1px);
+      }
+
+      .ptr-l {
+        background-color: var(--color-pointer-l);
+      }
+
+      .ptr-m {
+        background-color: var(--color-pointer-m);
+      }
+
+      .ptr-h {
+        background-color: var(--color-pointer-h);
+      }
+
+      /* =========================================
+   老師提示 / Challenge
+   ========================================= */
+
+      .teacher-tip {
+        position: relative;
+        z-index: 1;
+        background-color: #fff4bf;
+        border: 3px solid var(--line);
+        padding: 18px 20px;
+        margin: 22px 0;
+        border-radius: 22px;
+        box-shadow: var(--shadow-sm);
+      }
+
+      .teacher-tip strong {
+        color: var(--text-main);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 8px;
+        font-size: 1.08rem;
+        font-weight: 900;
+      }
+
+      .download-scratch-box {
+        position: relative;
+        z-index: 1;
+        background: #ffffff;
+        border: 3px solid var(--line);
+        border-radius: 24px;
+        padding: 22px;
+        margin: 24px 0;
+        box-shadow: var(--shadow-sm);
+      }
+
+      .download-scratch-box h3 {
+        margin-bottom: 8px;
+      }
+
+      .scratch-download-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 14px;
+        margin-top: 14px;
+      }
+      /* =========================================
+   Scratch 作業檢查器
+   ========================================= */
+
+      .checker-box {
+        position: relative;
+        z-index: 1;
+        background: #ffffff;
+        border: 3px solid var(--line);
+        border-radius: 24px;
+        padding: 22px;
+        margin: 24px 0;
+        box-shadow: var(--shadow-sm);
+        display: flex;
+        flex-wrap: wrap;
+        gap: 14px;
+        align-items: center;
+      }
+
+      .checker-box label {
+        font-weight: 900;
+      }
+
+      .checker-box input[type="file"] {
+        background: #fffdf7;
+        border: 3px solid var(--line);
+        border-radius: 14px;
+        padding: 10px;
+        font-weight: 800;
+        max-width: 100%;
+      }
+
+      .checker-result {
+        position: relative;
+        z-index: 1;
+        background: #ffffff;
+        border: 3px solid var(--line);
+        border-radius: 24px;
+        padding: 22px;
+        margin-top: 18px;
+        box-shadow: var(--shadow-sm);
+        display: none;
+      }
+
+      .checker-result ul {
+        margin-left: 1.5rem;
+        margin-top: 12px;
+      }
+
+      .checker-result li {
+        margin-bottom: 8px;
+      }
+
+      .check-pass {
+        color: #1f7a3a;
+        font-weight: 900;
+      }
+
+      .check-fail {
+        color: #c94a4a;
+        font-weight: 900;
+      }
+
+      .check-score {
+        font-size: 1.4rem;
+        font-weight: 900;
+        margin-bottom: 12px;
+      }
+      .challenge-box {
+        position: relative;
+        z-index: 1;
+        background: #ffffff;
+        border: 3px solid var(--line);
+        padding: 26px;
+        text-align: center;
+        border-radius: 26px;
+        box-shadow: var(--shadow-sm);
+      }
+
+      .challenge-array {
+        display: inline-block;
+        max-width: 100%;
+        overflow-x: auto;
+        background: #fffaf0;
+        border: 3px solid var(--line);
+        border-radius: 18px;
+        padding: 12px 16px;
+        font-size: 1.35rem;
+        letter-spacing: 1px;
+        margin: 1rem 0;
+        font-family: "Courier New", monospace;
+        font-weight: 900;
+      }
+
+      .challenge-btns {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        margin-top: 1.5rem;
+        flex-wrap: wrap;
+      }
+
+      /* =========================================
+   比較表
+   ========================================= */
+
+      .comparison-table {
+        position: relative;
+        z-index: 1;
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        margin-top: 1.5rem;
+        background: #ffffff;
+        border: 3px solid var(--line);
+        border-radius: 22px;
+        overflow: hidden;
+        box-shadow: var(--shadow-sm);
+      }
+
+      .comparison-table th,
+      .comparison-table td {
+        border-bottom: 3px solid var(--line);
+        border-right: 3px solid var(--line);
+        padding: 1rem;
+        text-align: left;
+        vertical-align: top;
+      }
+
+      .comparison-table th:last-child,
+      .comparison-table td:last-child {
+        border-right: none;
+      }
+
+      .comparison-table tr:last-child td {
+        border-bottom: none;
+      }
+
+      .comparison-table th {
+        background-color: #fff4bf;
+        font-weight: 900;
+        color: var(--text-main);
+      }
+
+      .comparison-table tr:hover td {
+        background-color: #fffaf0;
+      }
+
+      /* =========================================
+   複雜度模擬器
+   ========================================= */
+
+      .slider-container {
+        position: relative;
+        z-index: 1;
+        margin: 2rem 0;
+        padding: 24px;
+        background: #ffffff;
+        border: 3px solid var(--line);
+        border-radius: 24px;
+        box-shadow: var(--shadow-sm);
+      }
+
+      .slider-container input[type="range"] {
+        width: 100%;
+        margin: 1rem 0;
+        cursor: pointer;
+        accent-color: var(--primary);
+      }
+
+      .chart-row {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1rem;
+        gap: 14px;
+      }
+
+      .chart-label {
+        width: 140px;
+        font-weight: 900;
+      }
+
+      .chart-bar-container {
+        flex-grow: 1;
+        background: #eee7d8;
+        border: 3px solid var(--line);
+        border-radius: 999px;
+        height: 32px;
+        overflow: hidden;
+        position: relative;
+      }
+
+      .chart-bar {
+        height: 100%;
+        display: flex;
+        align-items: center;
+        padding-left: 0.75rem;
+        color: white;
+        font-weight: 900;
+        font-size: 0.9rem;
+        transition: width 0.5s ease-out;
+        white-space: nowrap;
+      }
+
+      .bar-linear {
+        background-color: var(--primary);
+        width: 0%;
+      }
+
+      .bar-binary {
+        background-color: #52a864;
+        width: 0%;
+      }
+
+      /* =========================================
+   Badge
+   ========================================= */
+
+      .badge {
+        display: inline-block;
+        padding: 0.28rem 0.65rem;
+        border-radius: 9999px;
+        font-size: 0.85rem;
+        font-weight: 900;
+        margin-left: 0.5rem;
+        vertical-align: middle;
+        border: 2px solid var(--line);
+      }
+
+      .badge-warning {
+        background-color: var(--yellow);
+        color: var(--text-main);
+      }
+
+      .badge-info {
+        background-color: var(--blue);
+        color: var(--text-main);
+      }
+
+      /* =========================================
+   Scratch 分頁
+   ========================================= */
+
+      .tabs-header {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        gap: 12px;
+        border-bottom: none;
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
+      }
+
+      .tab-btn {
+        flex: 1;
+        min-width: 220px;
+        padding: 1rem;
+        background: #ffffff;
+        border: 3px solid var(--line);
+        border-radius: 999px;
+        font-size: 1.1rem;
+        font-weight: 900;
+        color: var(--text-main);
+        cursor: pointer;
+        transition: all 0.18s;
+        box-shadow: 3px 4px 0 rgba(32, 50, 59, 0.18);
+      }
+
+      .tab-btn:hover {
+        background: #fff4bf;
+        transform: translateY(-1px);
+      }
+
+      .tab-btn.active {
+        background: var(--yellow);
+        color: var(--text-main);
+        transform: translateY(2px);
+        box-shadow: 1px 2px 0 rgba(32, 50, 59, 0.18);
+      }
+
+      .tab-content {
+        position: relative;
+        z-index: 1;
+        display: none;
+        animation: fadeIn 0.25s ease-in-out;
+      }
+
+      .tab-content.active {
+        display: block;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(8px);
+        }
+
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .scratch-elements {
+        background: #fff4bf;
+        padding: 1.5rem;
+        border-radius: 22px;
+        border: 3px solid var(--line);
+        margin-bottom: 1.5rem;
+        box-shadow: var(--shadow-sm);
+      }
+
+      .scratch-elements ul {
+        margin-left: 1.5rem;
+        margin-top: 0.5rem;
+      }
+
+      .scratch-code-box {
+        background: #22313a;
+        color: #e8efe9;
+        padding: 1.5rem;
+        border-radius: 22px;
+        border: 3px solid var(--line);
+        font-family: "Courier New", monospace;
+        line-height: 1.8;
+        font-size: 1rem;
+        overflow-x: auto;
+        box-shadow: var(--shadow-sm);
+      }
+
+      /* Scratch 積木文字顏色 */
+
+      .sc-var {
+        color: #ffb347;
+        font-weight: 900;
+      }
+
+      .sc-list {
+        color: #ff8da1;
+        font-weight: 900;
+      }
+
+      .sc-ctrl {
+        color: #ffd166;
+        font-weight: 900;
+      }
+
+      .sc-op {
+        color: #9be18f;
+        font-weight: 900;
+      }
+
+      .sc-look {
+        color: #caa8ff;
+        font-weight: 900;
+      }
+
+      .sc-text {
+        color: #ffe6a7;
+      }
+
+      .sc-comment {
+        color: #9fb2ba;
+        font-style: italic;
+      }
+
+      /* =========================================
+   二元搜尋思考地圖
+   ========================================= */
+
+      .algorithm-map-box {
+        position: relative;
+        z-index: 1;
+        background: #ffffff;
+        border: 3px solid var(--line);
+        border-radius: 24px;
+        padding: 24px;
+        margin: 24px 0;
+        box-shadow: var(--shadow-sm);
+      }
+
+      .algorithm-map-box h3 {
+        margin-bottom: 8px;
+      }
+
+      .algorithm-map-desc {
+        color: var(--text-light);
+        margin-bottom: 20px;
+      }
+
+      .algo-step-list {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .algo-step {
+        display: grid;
+        grid-template-columns: 54px 1fr;
+        gap: 14px;
+        align-items: start;
+        background: #fffaf0;
+        border: 3px solid var(--line);
+        border-radius: 22px;
+        padding: 16px;
+        box-shadow: 3px 4px 0 rgba(32, 50, 59, 0.14);
+      }
+
+      .step-number {
+        width: 44px;
+        height: 44px;
+        border-radius: 999px;
+        background: #ffe095;
+        border: 3px solid var(--line);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 900;
+        font-size: 1.3rem;
+        box-shadow: 2px 3px 0 rgba(32, 50, 59, 0.18);
+      }
+
+      .step-content h4 {
+        margin-bottom: 6px;
+        font-size: 1.15rem;
+        font-weight: 900;
+      }
+
+      .step-content p {
+        margin-bottom: 10px;
+      }
+
+      .mini-code {
+        display: inline-block;
+        background: #22313a;
+        color: #fffdf7;
+        border-radius: 14px;
+        padding: 10px 14px;
+        font-family: "Courier New", monospace;
+        font-weight: 900;
+        line-height: 1.6;
+        border: 3px solid var(--line);
+      }
+
+      .decision-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 10px;
+      }
+
+      .decision-question,
+      .decision-result {
+        display: inline-block;
+        border: 2px solid var(--line);
+        border-radius: 999px;
+        padding: 6px 12px;
+        font-weight: 900;
+      }
+
+      .decision-question {
+        background: #ffffff;
+      }
+
+      .decision-result.good {
+        background: #b9e7b8;
+      }
+
+      .decision-result.bad {
+        background: #ffd8d5;
+      }
+
+      .two-choice-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+        margin-top: 12px;
+      }
+
+      .choice-card {
+        background: #ffffff;
+        border: 3px solid var(--line);
+        border-radius: 18px;
+        padding: 16px;
+      }
+
+      .choice-card h5 {
+        font-size: 1rem;
+        font-weight: 900;
+        margin-bottom: 8px;
+      }
+
+      .choice-note {
+        margin-top: 10px;
+        margin-bottom: 0;
+        font-weight: 900;
+        color: var(--primary);
+      }
+
+      .loop-back {
+        background: #eef8ff;
+      }
+
+      @media (max-width: 720px) {
+        .algo-step {
+          grid-template-columns: 1fr;
+        }
+
+        .step-number {
+          width: 40px;
+          height: 40px;
+        }
+
+        .two-choice-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      /* =========================================
+   其他共用
+   ========================================= */
+
+      .flex-col-md {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+      }
+
+      code {
+        background: #fffdf7;
+        border: 2px solid rgba(32, 50, 59, 0.35);
+        border-radius: 8px;
+        padding: 0.05rem 0.35rem;
+        font-weight: 800;
+      }
+
+      strong {
+        font-weight: 900;
+      }
+
+      /* =========================================
+   RWD
+   ========================================= */
+
+      @media (min-width: 768px) {
+        .flex-row-md {
+          display: flex;
+          gap: 2rem;
+        }
+
+        .w-half {
+          flex: 1;
+        }
+      }
+
+      @media (max-width: 720px) {
+        .container {
+          padding: 18px 12px 40px;
+        }
+
+        header,
+        section {
+          padding: 26px 18px;
+          border-radius: 24px;
+        }
+
+        h2 {
+          align-items: flex-start;
+        }
+
+        .controls {
+          align-items: stretch;
+        }
+
+        .controls input[type="range"] {
+          width: 100%;
+        }
+
+        .btn {
+          width: 100%;
+          text-align: center;
+        }
+
+        .card {
+          width: 52px;
+          height: 52px;
+        }
+
+        .chart-row {
+          align-items: stretch;
+          flex-direction: column;
+        }
+
+        .chart-label {
+          width: auto;
+        }
+
+        .comparison-table {
+          font-size: 0.92rem;
+        }
+
+        .comparison-table th,
+        .comparison-table td {
+          padding: 0.75rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <!-- 開場區 -->
+      <header>
+        <h1>🔍 搜尋演算法互動教室</h1>
+        <p class="subtitle">讓資料無所遁形！用動畫看懂電腦是怎麼找東西的</p>
+
+        <div class="analogy-box">
+          <strong>🤔 什麼是搜尋演算法？</strong><br />
+          想像一下，你要在學校的「置物櫃」找朋友的物品，或是從「電話簿」找某人的號碼。你可以從第一個櫃子開始一個一個打開看（循序搜尋），或者如果你知道號碼牌是按順序排好的，你可以直接從中間翻開，看要往前找還是往後找（二元搜尋）。這就是電腦找資料的方法！
+        </div>
+
+        <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap">
+          <a href="#linear-section" class="btn">開始體驗 循序搜尋 (Linear Search)</a>
+          <a href="#binary-section" class="btn btn-green">開始體驗 二元搜尋 (Binary Search)</a>
+        </div>
+      </header>
+
+      <!-- 循序搜尋區 -->
+      <section id="linear-section">
+        <h2>循序搜尋 (Linear Search) <span class="badge badge-info">不需排序</span></h2>
+        <p>這是最簡單直觀的方法。電腦會從第一筆資料開始，<strong>一個接著一個往後檢查</strong>，直到找到目標，或是全部檢查完發現找不到為止。</p>
+
+        <div class="teacher-tip">
+          <strong>💡 老師提示</strong>
+          循序搜尋的好處是「資料不用排好隊」就能直接找。缺點是如果運氣不好，目標在最後一個，就要花很久的時間！
+        </div>
+
+        <div class="controls">
+          <label for="lin-size">資料數量: <span id="lin-size-val">15</span></label>
+          <input type="range" id="lin-size" min="5" max="30" value="15" aria-label="資料數量" />
+
+          <label for="lin-target">尋找數字：</label>
+          <input type="number" id="lin-target" value="24" aria-label="要尋找的數字" />
+
+          <label for="lin-speed">速度：</label>
+          <select id="lin-speed">
+            <option value="1200">🐢 慢速</option>
+            <option value="600" selected>🚶 普通</option>
+            <option value="200">🚀 快速</option>
+          </select>
+
+          <div style="flex-grow: 1"></div>
+
+          <button class="btn" id="lin-btn-start">▶️ 自動播放</button>
+          <button class="btn btn-outline" id="lin-btn-step">👣 下一步</button>
+          <button class="btn btn-outline" id="lin-btn-reset" disabled>🔄 重置</button>
+        </div>
+
+        <div class="message-area msg-info" id="lin-message" aria-live="polite">準備就緒。請輸入數字並按下「自動播放」或「下一步」。</div>
+
+        <div class="array-container" id="lin-array-container">
+          <!-- 卡片由 JS 產生 -->
+        </div>
+      </section>
+
+      <!-- 二元搜尋區 -->
+      <section id="binary-section">
+        <h2>二元搜尋 (Binary Search) <span class="badge badge-warning">必須排序</span></h2>
+        <p>這是一種非常聰明的方法！前提是<strong>資料必須先由小到大排好</strong>。它每次都會挑選「中間」的資料來比較，如果目標比較大，就往右邊找；如果比較小，就往左邊找。每次都能淘汰掉一半的資料！</p>
+
+        <div class="teacher-tip">
+          <strong>💡 思考問題</strong>
+          為什麼二元搜尋每次都可以排除一半的資料？如果資料沒有照順序排好，二元搜尋還能準確排除嗎？
+        </div>
+
+        <div class="controls">
+          <label for="bin-size">資料數量: <span id="bin-size-val">15</span></label>
+          <input type="range" id="bin-size" min="5" max="30" value="15" aria-label="資料數量" />
+
+          <label for="bin-target">尋找數字：</label>
+          <input type="number" id="bin-target" value="31" aria-label="要尋找的數字" />
+
+          <label for="bin-speed">速度：</label>
+          <select id="bin-speed">
+            <option value="1500">🐢 慢速</option>
+            <option value="800" selected>🚶 普通</option>
+            <option value="300">🚀 快速</option>
+          </select>
+
+          <div style="flex-grow: 1"></div>
+
+          <button class="btn btn-green" id="bin-btn-start">▶️ 自動播放</button>
+          <button class="btn btn-outline" id="bin-btn-step">👣 下一步</button>
+          <button class="btn btn-outline" id="bin-btn-reset" disabled>🔄 重置</button>
+        </div>
+
+        <div class="message-area msg-info" id="bin-message" aria-live="polite">請注意：下方的資料已經由小到大排序完成！請開始搜尋。</div>
+
+        <div class="array-container" id="bin-array-container">
+          <!-- 卡片由 JS 產生 -->
+        </div>
+
+        <div style="text-align: center; margin-top: 1rem; color: var(--text-light); font-size: 0.9rem">
+          <span style="color: var(--color-pointer-l); font-weight: bold">L (Low) 左邊界</span> | <span style="color: var(--color-pointer-m); font-weight: bold">M (Mid) 中間值</span> |
+          <span style="color: var(--color-pointer-h); font-weight: bold">H (High) 右邊界</span>
+        </div>
+      </section>
+
+      <!-- 猜數字遊戲區 -->
+      <section id="guess-game-section">
+        <h2>🎮 隱藏關卡：猜數字遊戲 (就像二元搜尋！)</h2>
+        <p>其實「二元搜尋」的邏輯，就跟我們常玩的「猜大小 (終極密碼)」一模一樣！現在系統在 1 ~ 100 之間挑了一個數字，請你試著用<strong>「每次猜正中間」</strong>的策略來找出它吧。</p>
+
+        <div class="challenge-box">
+          <h3>目前範圍： <span id="guess-range" style="color: var(--primary); font-size: 2rem">1 ~ 100</span></h3>
+          <p>你已經猜了 <span id="guess-count" style="font-weight: bold; color: var(--color-pointer-h); font-size: 1.2rem">0</span> 次</p>
+
+          <div class="controls" style="justify-content: center; background: transparent; border: none; padding-bottom: 0">
+            <input type="number" id="guess-input" min="1" max="100" placeholder="輸入 1~100" style="width: 120px" />
+            <button class="btn btn-green" id="btn-guess-submit">猜！</button>
+            <button class="btn btn-outline" id="btn-guess-reset" style="display: none">再玩一次</button>
+          </div>
+
+          <div id="guess-message" class="message-area" style="display: none; margin-top: 1rem"></div>
+        </div>
+
+        <div class="teacher-tip">
+          <strong>💡 老師提示</strong>
+          一開始範圍是 1~100，如果你猜 50，馬上就能把範圍縮小一半變成 1~49 或 51~100。這就是二元搜尋的威力！即使是 1~100，最多也只要猜 7 次就一定會中喔。
+        </div>
+      </section>
+
+      <!-- 比較區 -->
+      <section id="comparison">
+        <h2>📊 搜尋演算法大比拚</h2>
+        <div style="overflow-x: auto">
+          <table class="comparison-table">
+            <thead>
+              <tr>
+                <th>比較項目</th>
+                <th>循序搜尋 (Linear Search)</th>
+                <th>二元搜尋 (Binary Search)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>資料前提</strong></td>
+                <td><span style="color: var(--color-found-border); font-weight: bold">不需排序</span> (任何情況都能用)</td>
+                <td><span style="color: var(--color-error); font-weight: bold">必須排序</span> (未排序會找錯)</td>
+              </tr>
+              <tr>
+                <td><strong>搜尋方式</strong></td>
+                <td>從頭開始，一個一個檢查到底</td>
+                <td>從中間切開，每次淘汰一半</td>
+              </tr>
+              <tr>
+                <td><strong>適合情境</strong></td>
+                <td>資料量少，或是資料經常變動來不及排序時</td>
+                <td>資料量大，且資料已經排好順序時</td>
+              </tr>
+              <tr>
+                <td>
+                  <strong>效率概念<br />(時間複雜度)</strong>
+                </td>
+                <td>
+                  <strong>O(n)</strong><br />
+                  <small>資料如果變 2 倍多，最倒楣的情況下，檢查次數也會變成接近 2 倍。</small>
+                </td>
+                <td>
+                  <strong>O(log n)</strong><br />
+                  <small>就算資料變「非常多」，檢查次數也只會「慢慢」增加。效率極高！</small>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- 互動挑戰區 -->
+      <section id="challenge">
+        <h2>🎮 實戰挑戰：你選哪一個？</h2>
+        <p>系統已經隨機產生了一組資料和一個目標數字，請觀察這組資料，並選擇你覺得最適合的搜尋方法！</p>
+
+        <div class="challenge-box">
+          <h3>目標數字： <span id="chal-target" style="color: var(--primary); font-size: 1.8rem; font-weight: bold">?</span></h3>
+          <div class="challenge-array" id="chal-array">[ 產生中... ]</div>
+          <div class="challenge-btns">
+            <button class="btn btn-outline" id="btn-guess-lin">選擇：循序搜尋</button>
+            <button class="btn btn-outline" id="btn-guess-bin">選擇：二元搜尋</button>
+          </div>
+          <div id="chal-feedback" class="message-area" style="margin-top: 1.5rem; display: none"></div>
+          <button class="btn" id="btn-chal-next" style="margin-top: 1rem; display: none">換一題</button>
+        </div>
+      </section>
+
+      <!-- 資料量模擬器 -->
+      <section id="complexity-simulator">
+        <h2>📈 資料量變大時會發生什麼事？(最壞情況)</h2>
+        <p>拖曳下方的滑桿，看看當資料總數增加時，兩種演算法「最多」需要檢查幾次才能確定結果。</p>
+
+        <div class="slider-container">
+          <label for="data-size-slider"
+            ><strong>資料數量： <span id="data-size-display" style="color: var(--primary); font-size: 1.5rem">16</span> 筆</strong></label
+          >
+          <!-- 對數級距：2^3=8 到 2^11=2048 -->
+          <input type="range" id="data-size-slider" min="3" max="11" step="1" value="4" />
+
+          <div style="margin-top: 2rem">
+            <div class="chart-row">
+              <div class="chart-label">循序搜尋<br /><small id="chart-val-lin">最多 16 次</small></div>
+              <div class="chart-bar-container">
+                <div class="chart-bar bar-linear" id="bar-linear"></div>
+              </div>
+            </div>
+            <div class="chart-row">
+              <div class="chart-label">二元搜尋<br /><small id="chart-val-bin">最多 5 次</small></div>
+              <div class="chart-bar-container">
+                <div class="chart-bar bar-binary" id="bar-binary"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="teacher-tip">
+          <strong>💡 驚人的差距</strong>
+          當資料量達到 2000 筆時，循序搜尋最差要找 2000 次，但二元搜尋最多只要找 12 次！這就是為什麼在龐大的資料庫中，排序和二元搜尋這麼重要。
+        </div>
+      </section>
+
+      <!-- Scratch 實作解析區 -->
+      <section id="scratch-guide">
+        <h2>🐱 如果用 Scratch 寫，積木要怎麼拼？</h2>
+        <p>資訊課學過 Scratch 嗎？其實我們可以用 Scratch 的「清單」與「變數」積木來實作這兩種搜尋演算法喔！點擊下方標籤看差別：</p>
+
+        <div class="download-scratch-box">
+          <h3>📦 下載 Scratch 半完成練習檔</h3>
+          <p>這兩個檔案已經幫你準備好角色、資料清單、變數和引導說明， 但真正的搜尋邏輯還要由學生自己完成。</p>
+
+          <div class="scratch-download-buttons">
+            <button class="btn" id="download-linear-sb3">下載：循序搜尋半完成版 .sb3</button>
+
+            <button class="btn btn-green" id="download-binary-sb3">下載：二元搜尋半完成版 .sb3</button>
+          </div>
+        </div>
+
+        <div class="tabs-header">
+          <button class="tab-btn active" id="tab-btn-linear">循序搜尋 (Linear Search)</button>
+          <button class="tab-btn" id="tab-btn-binary">二元搜尋 (Binary Search)</button>
+        </div>
+
+        <!-- 循序搜尋 Scratch 解析 -->
+        <div class="tab-content active" id="tab-content-linear">
+          <div class="scratch-elements">
+            <h3>🛠️ 需要準備的元素與變數：</h3>
+            <ul>
+              <li><strong class="sc-list">清單 (List)：</strong> 建立一個名為 <code>[資料清單]</code> 的清單，並隨便填入幾個數字。</li>
+              <li>
+                <strong class="sc-var">變數 (Variables)：</strong> 建立 2 個變數。
+                <ul>
+                  <li><code>(目標數字)</code>：玩家想尋找的數字。</li>
+                  <li><code>(i)</code>：用來記錄目前檢查到清單的「第幾個」位置（索引）。</li>
+                </ul>
+              </li>
+            </ul>
+          </div>
+
+          <div class="algorithm-map-box">
+            <h3>🧭 循序搜尋思考地圖</h3>
+            <p class="algorithm-map-desc">循序搜尋的想法很直接：從第 1 個開始，一個一個檢查。 如果找到目標就立刻停止；如果一路檢查到最後都沒找到，就表示清單裡沒有這個數字。</p>
+
+            <div class="algo-step-list">
+              <div class="algo-step">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                  <h4>先設定起點</h4>
+                  <p>我們從清單的第 1 個位置開始找。</p>
+                  <div class="mini-code">i = 1</div>
+                </div>
+              </div>
+
+              <div class="algo-step">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                  <h4>檢查還有沒有下一個可以找</h4>
+                  <p>如果 i 已經超過清單長度，代表整份清單都看完了。</p>
+                  <div class="decision-row">
+                    <span class="decision-question">i &gt; 資料清單長度？</span>
+                    <span class="decision-result bad">是 → 找不到</span>
+                    <span class="decision-result good">否 → 繼續找</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="algo-step">
+                <div class="step-number">3</div>
+                <div class="step-content">
+                  <h4>看看現在這一項是不是答案</h4>
+                  <p>拿「資料清單第 i 項」和「目標數字」做比較。</p>
+                  <div class="decision-row">
+                    <span class="decision-question">資料清單第 i 項 = 目標數字？</span>
+                    <span class="decision-result good">是 → 找到了</span>
+                    <span class="decision-result bad">否 → 看下一個</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="algo-step">
+                <div class="step-number">4</div>
+                <div class="step-content">
+                  <h4>如果找到了，就說出答案並停止</h4>
+                  <p>一旦找到，就不需要再往後找了。</p>
+                  <div class="mini-code">
+                    說出「找到啦！在第 i 個位置」<br />
+                    停止這個腳本
+                  </div>
+                </div>
+              </div>
+
+              <div class="algo-step">
+                <div class="step-number">5</div>
+                <div class="step-content">
+                  <h4>如果還沒找到，就換看下一個</h4>
+                  <p>把 i 往後移 1 格，表示下一輪要檢查下一個位置。</p>
+                  <div class="mini-code">i 改變 1</div>
+                </div>
+              </div>
+
+              <div class="algo-step loop-back">
+                <div class="step-number">6</div>
+                <div class="step-content">
+                  <h4>回到第 2 步，再檢查一次</h4>
+                  <p>
+                    更新 i 之後，再重新判斷：
+                    <strong>i 是否已經超過資料清單長度？</strong>
+                  </p>
+                </div>
+              </div>
+
+              <div class="algo-step">
+                <div class="step-number">7</div>
+                <div class="step-content">
+                  <h4>如果整份清單都找完了還沒找到</h4>
+                  <p>代表這個數字不在資料清單裡。</p>
+                  <div class="mini-code">說出「找不到這個數字...」</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <h3>🧩 核心積木邏輯：</h3>
+          <div class="scratch-code-box">
+            <span class="sc-var">變數 (i) 設為 1</span> <span class="sc-comment">// 從第1個開始找</span><br />
+            <br />
+            <span class="sc-ctrl">重複直到</span> ( <span class="sc-op"><span class="sc-var">(i)</span> &gt; <span class="sc-list">(資料清單 的長度)</span></span> )<br />
+            &nbsp;&nbsp;<span class="sc-ctrl">如果</span> (
+            <span class="sc-op"
+              ><span class="sc-list">(資料清單 的第 <span class="sc-var">(i)</span> 項)</span> = <span class="sc-var">(目標數字)</span></span
+            >
+            ) <span class="sc-ctrl">那麼</span><br />
+            &nbsp;&nbsp;&nbsp;&nbsp;<span class="sc-look">說出</span>
+            <span class="sc-op">組合 <span class="sc-text">"找到啦！在第"</span> 與 <span class="sc-var">(i)</span> 與 <span class="sc-text">"個位置"</span></span> <span class="sc-look">2 秒</span
+            ><br />
+            &nbsp;&nbsp;&nbsp;&nbsp;<span class="sc-ctrl">停止 [這個腳本]</span><br />
+            &nbsp;&nbsp;<span class="sc-ctrl">否則</span><br />
+            &nbsp;&nbsp;&nbsp;&nbsp;<span class="sc-var">變數 (i) 改變 1</span> <span class="sc-comment">// 找不到就換看下一個</span><br />
+            <br />
+            <span class="sc-comment">// 如果整個迴圈跑完都沒碰到「停止腳本」，代表沒找到</span><br />
+            <span class="sc-look">說出</span> <span class="sc-text">"找不到這個數字..."</span> <span class="sc-look">2 秒</span>
+          </div>
+        </div>
+
+        <!-- 二元搜尋 Scratch 解析 -->
+        <div class="tab-content" id="tab-content-binary">
+          <div class="scratch-elements">
+            <h3>🛠️ 需要準備的元素與變數：</h3>
+            <ul>
+              <li><strong class="sc-list">清單 (List)：</strong> 建立一個 <code>[資料清單]</code>，⚠️ <strong>裡面數字必須由小到大排好！</strong></li>
+              <li>
+                <strong class="sc-var">變數 (Variables)：</strong> 建立 4 個變數。
+                <ul>
+                  <li><code>(目標數字)</code>：玩家想尋找的數字。</li>
+                  <li><code>(L)</code>：左邊界，一開始設為 1。</li>
+                  <li><code>(R)</code>：右邊界，一開始設為清單的長度。</li>
+                  <li><code>(M)</code>：中間位置。每次都是 L 和 R 相加除以 2。</li>
+                </ul>
+              </li>
+            </ul>
+          </div>
+
+          <div class="algorithm-map-box">
+            <h3>🧭 二元搜尋思考地圖</h3>
+            <p class="algorithm-map-desc">先不要急著拼積木。二元搜尋可以想成一連串「縮小範圍」的決策。 每一輪都只做三件事：看範圍、找中間、決定往哪邊找。</p>
+
+            <div class="algo-step-list">
+              <div class="algo-step">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                  <h4>先設定搜尋範圍</h4>
+                  <p>一開始整個清單都可能是答案，所以：</p>
+                  <div class="mini-code">
+                    L = 1<br />
+                    R = 資料清單的長度
+                  </div>
+                </div>
+              </div>
+
+              <div class="algo-step">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                  <h4>檢查範圍還有沒有東西</h4>
+                  <p>如果 L 跑到 R 的右邊，代表搜尋範圍已經空了。</p>
+                  <div class="decision-row">
+                    <span class="decision-question">L &gt; R？</span>
+                    <span class="decision-result bad">是 → 找不到</span>
+                    <span class="decision-result good">否 → 繼續找</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="algo-step">
+                <div class="step-number">3</div>
+                <div class="step-content">
+                  <h4>找出中間位置 M</h4>
+                  <p>每一輪都先看目前範圍的中間。</p>
+                  <div class="mini-code">M = 向下取整 ((L + R) / 2)</div>
+                </div>
+              </div>
+
+              <div class="algo-step">
+                <div class="step-number">4</div>
+                <div class="step-content">
+                  <h4>比較中間值是不是答案</h4>
+                  <p>拿「資料清單第 M 項」跟「目標數字」比較。</p>
+                  <div class="decision-row">
+                    <span class="decision-question">資料清單第 M 項 = 目標數字？</span>
+                    <span class="decision-result good">是 → 找到了</span>
+                    <span class="decision-result bad">否 → 繼續判斷方向</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="algo-step split-step">
+                <div class="step-number">5</div>
+                <div class="step-content">
+                  <h4>決定要保留左半邊還是右半邊</h4>
+
+                  <div class="two-choice-grid">
+                    <div class="choice-card">
+                      <h5>中間值太小</h5>
+                      <p>如果資料清單第 M 項 &lt; 目標數字，代表答案在右半邊。</p>
+                      <div class="mini-code">L = M + 1</div>
+                      <p class="choice-note">捨棄左半邊</p>
+                    </div>
+
+                    <div class="choice-card">
+                      <h5>中間值太大</h5>
+                      <p>如果資料清單第 M 項 &gt; 目標數字，代表答案在左半邊。</p>
+                      <div class="mini-code">R = M - 1</div>
+                      <p class="choice-note">捨棄右半邊</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="algo-step loop-back">
+                <div class="step-number">6</div>
+                <div class="step-content">
+                  <h4>回到第 2 步，再找一次</h4>
+                  <p>
+                    更新 L 或 R 之後，搜尋範圍變小了。接著再重新判斷：
+                    <strong>L 是否大於 R？</strong>
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <h3>🧩 核心積木邏輯：</h3>
+          <div class="scratch-code-box">
+            <span class="sc-var">變數 (L) 設為 1</span><br />
+            <span class="sc-var">變數 (R) 設為 <span class="sc-list">(資料清單 的長度)</span></span
+            ><br />
+            <br />
+            <span class="sc-ctrl">重複直到</span> ( <span class="sc-op"><span class="sc-var">(L)</span> &gt; <span class="sc-var">(R)</span></span> )
+            <span class="sc-comment">// 如果 L 跑到 R 右邊，代表範圍空了</span><br />
+            &nbsp;&nbsp;<span class="sc-var">變數 (M) 設為</span>
+            <span class="sc-op"
+              >向下取整 ( <span class="sc-op">( <span class="sc-var">(L)</span> + <span class="sc-var">(R)</span> ) / 2</span> )</span
+            ><br />
+            <br />
+            &nbsp;&nbsp;<span class="sc-ctrl">如果</span> (
+            <span class="sc-op"
+              ><span class="sc-list">(資料清單 的第 <span class="sc-var">(M)</span> 項)</span> = <span class="sc-var">(目標數字)</span></span
+            >
+            ) <span class="sc-ctrl">那麼</span><br />
+            &nbsp;&nbsp;&nbsp;&nbsp;<span class="sc-look">說出</span>
+            <span class="sc-op">組合 <span class="sc-text">"找到啦！在第"</span> 與 <span class="sc-var">(M)</span> 與 <span class="sc-text">"個位置"</span></span> <span class="sc-look">2 秒</span
+            ><br />
+            &nbsp;&nbsp;&nbsp;&nbsp;<span class="sc-ctrl">停止 [這個腳本]</span><br />
+            <br />
+            &nbsp;&nbsp;<span class="sc-ctrl">否則如果</span> (
+            <span class="sc-op"
+              ><span class="sc-list">(資料清單 的第 <span class="sc-var">(M)</span> 項)</span> &lt; <span class="sc-var">(目標數字)</span></span
+            >
+            ) <span class="sc-ctrl">那麼</span><br />
+            &nbsp;&nbsp;&nbsp;&nbsp;<span class="sc-comment">// 中間值比目標小，代表目標在右半邊，捨棄左半邊</span><br />
+            &nbsp;&nbsp;&nbsp;&nbsp;<span class="sc-var">變數 (L) 設為</span> <span class="sc-op"><span class="sc-var">(M)</span> + 1</span><br />
+            <br />
+            &nbsp;&nbsp;<span class="sc-ctrl">否則</span><br />
+            &nbsp;&nbsp;&nbsp;&nbsp;<span class="sc-comment">// 中間值比目標大，代表目標在左半邊，捨棄右半邊</span><br />
+            &nbsp;&nbsp;&nbsp;&nbsp;<span class="sc-var">變數 (R) 設為</span> <span class="sc-op"><span class="sc-var">(M)</span> - 1</span><br />
+            <br />
+            <span class="sc-look">說出</span> <span class="sc-text">"找不到這個數字..."</span> <span class="sc-look">2 秒</span>
+          </div>
+        </div>
+      </section>
+
+      <section id="scratch-checker">
+        <h2>🧪 Scratch 作業檢查器</h2>
+
+        <p>完成 Scratch 練習後，把 .sb3 檔案上傳到這裡，系統會檢查你是否有使用到關鍵積木。</p>
+
+        <div class="checker-box">
+          <label for="checker-mode"><strong>選擇要檢查的任務：</strong></label>
+          <select id="checker-mode">
+            <option value="linear">循序搜尋</option>
+            <option value="binary">二元搜尋</option>
+          </select>
+
+          <input type="file" id="sb3-upload" accept=".sb3" />
+
+          <button class="btn" id="check-sb3-btn">檢查我的 Scratch 作業</button>
+        </div>
+        <a href="quiz.html" class="btn btn-pink">完成練習後前往小測驗</a>
+        <div id="sb3-check-result" class="checker-result"></div>
+      </section>
+    </div>
+
+    <!-- =========================================
+         JavaScript 邏輯
+         ========================================= -->
+    <script>
+      // 通用工具函數
+      const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+      const $ = (id) => document.getElementById(id);
+
+      // 產生不重複的隨機陣列
+      function generateRandomArray(size, sorted = false) {
+        let arr = new Set();
+        while (arr.size < size) {
+          arr.add(Math.floor(Math.random() * 99) + 1); // 產生 1~99 的數字
+        }
+        let res = Array.from(arr);
+        if (sorted) res.sort((a, b) => a - b);
+        return res;
+      }
+
+      /* ==============================================================
+           循序搜尋 (Linear Search) 邏輯
+           ============================================================== */
+      const linState = {
+        array: [], // 將在 init 時動態產生
+        currentIndex: 0,
+        isPlaying: false,
+        resolveNextStep: null,
+        target: null,
+        steps: 0,
+      };
+
+      function initLinear() {
+        // 如果陣列為空，依照拉桿初始值產生
+        if (linState.array.length === 0) {
+          linState.array = generateRandomArray(parseInt($("lin-size").value), false);
+          $("lin-target").value = linState.array[Math.floor(Math.random() * linState.array.length)];
+        }
+
+        const container = $("lin-array-container");
+        container.innerHTML = "";
+        linState.array.forEach((num, idx) => {
+          const wrapper = document.createElement("div");
+          wrapper.className = "array-item-wrapper";
+
+          const card = document.createElement("div");
+          card.className = "card";
+          card.id = `lin-card-${idx}`;
+          card.textContent = num;
+
+          const indexLabel = document.createElement("div");
+          indexLabel.className = "card-index";
+          indexLabel.textContent = `[${idx}]`;
+
+          wrapper.appendChild(card);
+          wrapper.appendChild(indexLabel);
+          container.appendChild(wrapper);
+        });
+        resetLinearUI();
+      }
+
+      function resetLinearUI() {
+        linState.currentIndex = 0;
+        linState.isPlaying = false;
+        linState.steps = 0;
+        if (linState.resolveNextStep) linState.resolveNextStep("reset");
+
+        $("lin-message").className = "message-area msg-info";
+        $("lin-message").textContent = "準備就緒。請輸入數字並開始。";
+
+        linState.array.forEach((_, idx) => {
+          const card = $(`lin-card-${idx}`);
+          card.className = "card";
+        });
+
+        $("lin-btn-start").disabled = false;
+        $("lin-btn-step").disabled = false;
+        $("lin-btn-reset").disabled = true;
+      }
+
+      async function runLinearAlgorithm() {
+        const targetVal = parseInt($("lin-target").value);
+        if (isNaN(targetVal)) {
+          $("lin-message").textContent = "請輸入有效的數字！";
+          $("lin-message").className = "message-area msg-error";
+          return;
+        }
+        linState.target = targetVal;
+        linState.steps = 0;
+
+        $("lin-btn-start").disabled = true;
+        $("lin-btn-reset").disabled = false;
+        $("lin-message").className = "message-area msg-info";
+
+        for (let i = 0; i < linState.array.length; i++) {
+          linState.currentIndex = i;
+          linState.steps++;
+          const card = $(`lin-card-${i}`);
+
+          // 視覺化：正在檢查
+          card.classList.add("checking");
+          $("lin-message").textContent = `正在檢查索引 [${i}] 的資料：${linState.array[i]} 是否等於 ${linState.target}？`;
+
+          // 等待下一步或自動播放
+          const speed = parseInt($("lin-speed").value);
+          const action = await new Promise((resolve) => {
+            linState.resolveNextStep = resolve;
+            if (linState.isPlaying) {
+              setTimeout(() => resolve("auto"), speed);
+            }
+          });
+
+          if (action === "reset") return; // 被中斷
+          linState.resolveNextStep = null;
+
+          // 比較邏輯
+          if (linState.array[i] === linState.target) {
+            card.classList.remove("checking");
+            card.classList.add("found");
+            $("lin-message").textContent = `🎉 找到啦！數字 ${linState.target} 在索引 [${i}]。總共檢查了 ${linState.steps} 次。`;
+            $("lin-message").className = "message-area msg-success";
+            $("lin-btn-step").disabled = true;
+            linState.isPlaying = false;
+            return;
+          } else {
+            // 不符合，變成排除狀態
+            card.classList.remove("checking");
+            card.classList.add("excluded");
+          }
+        }
+
+        // 跑完迴圈沒找到
+        $("lin-message").textContent = `❌ 找不到數字 ${linState.target}。總共檢查了 ${linState.steps} 次。`;
+        $("lin-message").className = "message-area msg-error";
+        $("lin-btn-step").disabled = true;
+        linState.isPlaying = false;
+      }
+
+      // 循序搜尋事件綁定
+      $("lin-btn-start").addEventListener("click", () => {
+        if ($("lin-btn-step").disabled && !linState.isPlaying) {
+          resetLinearUI(); // 如果已經結束，先重置
+        }
+        linState.isPlaying = true;
+        $("lin-btn-step").disabled = true;
+
+        if (!linState.resolveNextStep && linState.currentIndex === 0) {
+          runLinearAlgorithm(); // 從頭開始
+        } else if (linState.resolveNextStep) {
+          linState.resolveNextStep("auto"); // 繼續播放
+        }
+      });
+
+      $("lin-btn-step").addEventListener("click", () => {
+        linState.isPlaying = false;
+        if (!linState.resolveNextStep && linState.currentIndex === 0) {
+          runLinearAlgorithm();
+        } else if (linState.resolveNextStep) {
+          linState.resolveNextStep("step");
+        }
+      });
+
+      $("lin-btn-reset").addEventListener("click", resetLinearUI);
+
+      // 監聽循序搜尋的資料數量拉桿
+      $("lin-size").addEventListener("input", (e) => {
+        $("lin-size-val").textContent = e.target.value;
+        // 中斷可能正在進行的動畫
+        if (linState.resolveNextStep) linState.resolveNextStep("reset");
+        // 重新產生陣列與目標
+        linState.array = generateRandomArray(parseInt(e.target.value), false);
+        $("lin-target").value = linState.array[Math.floor(Math.random() * linState.array.length)];
+        initLinear();
+      });
+
+      /* ==============================================================
+           二元搜尋 (Binary Search) 邏輯
+           ============================================================== */
+      const binState = {
+        array: [], // 將在 init 時動態產生
+        isPlaying: false,
+        resolveNextStep: null,
+        target: null,
+        steps: 0,
+      };
+
+      function initBinary() {
+        // 如果陣列為空，依照拉桿初始值產生
+        if (binState.array.length === 0) {
+          binState.array = generateRandomArray(parseInt($("bin-size").value), true);
+          $("bin-target").value = binState.array[Math.floor(Math.random() * binState.array.length)];
+        }
+
+        const container = $("bin-array-container");
+        container.innerHTML = "";
+        binState.array.forEach((num, idx) => {
+          const wrapper = document.createElement("div");
+          wrapper.className = "array-item-wrapper";
+
+          const card = document.createElement("div");
+          card.className = "card";
+          card.id = `bin-card-${idx}`;
+          card.textContent = num;
+
+          const indexLabel = document.createElement("div");
+          indexLabel.className = "card-index";
+          indexLabel.textContent = `[${idx}]`;
+
+          const pointerArea = document.createElement("div");
+          pointerArea.className = "pointer-area";
+          pointerArea.id = `bin-ptr-${idx}`;
+          // 裡面放入 L M H
+          pointerArea.innerHTML = `
+                    <span class="pointer ptr-l" id="ptr-l-${idx}">L</span>
+                    <span class="pointer ptr-m" id="ptr-m-${idx}">M</span>
+                    <span class="pointer ptr-h" id="ptr-h-${idx}">H</span>
+                `;
+
+          wrapper.appendChild(card);
+          wrapper.appendChild(indexLabel);
+          wrapper.appendChild(pointerArea);
+          container.appendChild(wrapper);
+        });
+        resetBinaryUI();
+      }
+
+      function resetBinaryUI() {
+        binState.isPlaying = false;
+        binState.steps = 0;
+        if (binState.resolveNextStep) binState.resolveNextStep("reset");
+
+        $("bin-message").className = "message-area msg-info";
+        $("bin-message").textContent = "請注意：資料已經排序。請輸入數字並開始。";
+
+        binState.array.forEach((_, idx) => {
+          $(`bin-card-${idx}`).className = "card";
+          $(`ptr-l-${idx}`).classList.remove("show");
+          $(`ptr-m-${idx}`).classList.remove("show");
+          $(`ptr-h-${idx}`).classList.remove("show");
+        });
+
+        $("bin-btn-start").disabled = false;
+        $("bin-btn-step").disabled = false;
+        $("bin-btn-reset").disabled = true;
+      }
+
+      function updatePointers(l, m, h) {
+        binState.array.forEach((_, idx) => {
+          $(`ptr-l-${idx}`).classList.remove("show");
+          $(`ptr-m-${idx}`).classList.remove("show");
+          $(`ptr-h-${idx}`).classList.remove("show");
+        });
+        if (l >= 0 && l < binState.array.length) $(`ptr-l-${l}`).classList.add("show");
+        if (m >= 0 && m < binState.array.length) $(`ptr-m-${m}`).classList.add("show");
+        if (h >= 0 && h < binState.array.length) $(`ptr-h-${h}`).classList.add("show");
+      }
+
+      function setExcludedRange(start, end) {
+        for (let i = start; i <= end; i++) {
+          if (i >= 0 && i < binState.array.length) {
+            $(`bin-card-${i}`).classList.add("excluded");
+            $(`bin-card-${i}`).classList.remove("checking");
+          }
+        }
+      }
+
+      async function waitBinaryStep() {
+        const speed = parseInt($("bin-speed").value);
+        const action = await new Promise((resolve) => {
+          binState.resolveNextStep = resolve;
+          if (binState.isPlaying) {
+            setTimeout(() => resolve("auto"), speed);
+          }
+        });
+        binState.resolveNextStep = null;
+        return action;
+      }
+
+      async function runBinaryAlgorithm() {
+        const targetVal = parseInt($("bin-target").value);
+        if (isNaN(targetVal)) {
+          $("bin-message").textContent = "請輸入有效的數字！";
+          $("bin-message").className = "message-area msg-error";
+          return;
+        }
+        binState.target = targetVal;
+        binState.steps = 0;
+
+        $("bin-btn-start").disabled = true;
+        $("bin-btn-reset").disabled = false;
+        $("bin-message").className = "message-area msg-info";
+
+        let low = 0;
+        let high = binState.array.length - 1;
+
+        while (low <= high) {
+          binState.steps++;
+          let mid = Math.floor((low + high) / 2);
+
+          // 步驟 A：標示當前 L, M, H
+          updatePointers(low, mid, high);
+          $(`bin-card-${mid}`).classList.add("checking");
+          $("bin-message").textContent = `範圍 [${low} 到 ${high}]。計算中間值 (Mid): 索引 ${mid}，數值為 ${binState.array[mid]}。`;
+
+          if ((await waitBinaryStep()) === "reset") return;
+
+          // 步驟 B：比較
+          const midValue = binState.array[mid];
+          if (midValue === binState.target) {
+            $(`bin-card-${mid}`).classList.remove("checking");
+            $(`bin-card-${mid}`).classList.add("found");
+            $("bin-message").textContent = `🎉 找到啦！數值 ${binState.target} 等於中間值，位在索引 [${mid}]。總共檢查了 ${binState.steps} 次。`;
+            $("bin-message").className = "message-area msg-success";
+            $("bin-btn-step").disabled = true;
+            binState.isPlaying = false;
+            return;
+          } else if (midValue < binState.target) {
+            $("bin-message").textContent = `${binState.target} 大於中間值 ${midValue}，所以捨棄左半邊，往右半邊找。`;
+            setExcludedRange(low, mid); // 視覺排除
+            low = mid + 1;
+          } else {
+            $("bin-message").textContent = `${binState.target} 小於中間值 ${midValue}，所以捨棄右半邊，往左半邊找。`;
+            setExcludedRange(mid, high); // 視覺排除
+            high = mid - 1;
+          }
+
+          $(`bin-card-${mid}`).classList.remove("checking");
+          if ((await waitBinaryStep()) === "reset") return;
+        }
+
+        // 找不到
+        updatePointers(-1, -1, -1);
+        $("bin-message").textContent = `❌ 搜尋範圍已經空了 (Low > High)，找不到數值 ${binState.target}。總共檢查了 ${binState.steps} 次。`;
+        $("bin-message").className = "message-area msg-error";
+        $("bin-btn-step").disabled = true;
+        binState.isPlaying = false;
+      }
+
+      // 二元搜尋事件綁定
+      $("bin-btn-start").addEventListener("click", () => {
+        if ($("bin-btn-step").disabled && !binState.isPlaying) {
+          resetBinaryUI();
+        }
+        binState.isPlaying = true;
+        $("bin-btn-step").disabled = true;
+
+        if (!binState.resolveNextStep && binState.steps === 0) {
+          runBinaryAlgorithm();
+        } else if (binState.resolveNextStep) {
+          binState.resolveNextStep("auto");
+        }
+      });
+
+      $("bin-btn-step").addEventListener("click", () => {
+        binState.isPlaying = false;
+        if (!binState.resolveNextStep && binState.steps === 0) {
+          runBinaryAlgorithm();
+        } else if (binState.resolveNextStep) {
+          binState.resolveNextStep("step");
+        }
+      });
+
+      $("bin-btn-reset").addEventListener("click", resetBinaryUI);
+
+      // 監聽二元搜尋的資料數量拉桿
+      $("bin-size").addEventListener("input", (e) => {
+        $("bin-size-val").textContent = e.target.value;
+        // 中斷可能正在進行的動畫
+        if (binState.resolveNextStep) binState.resolveNextStep("reset");
+        // 重新產生已排序陣列與目標
+        binState.array = generateRandomArray(parseInt(e.target.value), true);
+        $("bin-target").value = binState.array[Math.floor(Math.random() * binState.array.length)];
+        initBinary();
+      });
+
+      /* ==============================================================
+           猜數字遊戲邏輯
+           ============================================================== */
+      const guessState = {
+        target: 0,
+        min: 1,
+        max: 100,
+        count: 0,
+        gameOver: false,
+      };
+
+      function initGuessGame() {
+        guessState.target = Math.floor(Math.random() * 100) + 1;
+        guessState.min = 1;
+        guessState.max = 100;
+        guessState.count = 0;
+        guessState.gameOver = false;
+
+        $("guess-range").textContent = `${guessState.min} ~ ${guessState.max}`;
+        $("guess-count").textContent = guessState.count;
+        $("guess-input").value = "";
+        $("guess-input").disabled = false;
+        $("btn-guess-submit").style.display = "inline-block";
+        $("btn-guess-reset").style.display = "none";
+        $("guess-message").style.display = "none";
+        $("guess-message").className = "message-area";
+      }
+
+      function handleGuess() {
+        if (guessState.gameOver) return;
+
+        const val = parseInt($("guess-input").value);
+        if (isNaN(val) || val < 1 || val > 100) {
+          $("guess-message").style.display = "block";
+          $("guess-message").textContent = "請輸入 1 到 100 之間的有效數字！";
+          $("guess-message").className = "message-area msg-error";
+          return;
+        }
+
+        guessState.count++;
+        $("guess-count").textContent = guessState.count;
+        $("guess-message").style.display = "block";
+
+        if (val === guessState.target) {
+          $("guess-message").textContent = `🎉 恭喜答對！答案就是 ${guessState.target}。你總共猜了 ${guessState.count} 次！`;
+          $("guess-message").className = "message-area msg-success";
+          guessState.gameOver = true;
+          $("guess-input").disabled = true;
+          $("btn-guess-submit").style.display = "none";
+          $("btn-guess-reset").style.display = "inline-block";
+          $("guess-range").textContent = `命中目標: ${guessState.target}`;
+        } else if (val > guessState.target) {
+          $("guess-message").textContent = `太大了！答案比 ${val} 小。`;
+          $("guess-message").className = "message-area msg-error";
+          // 更新上限，但不應該比原來的上限大
+          if (val <= guessState.max) guessState.max = val - 1;
+        } else {
+          $("guess-message").textContent = `太小了！答案比 ${val} 大。`;
+          $("guess-message").className = "message-area msg-error";
+          // 更新下限，但不應該比原來的下限小
+          if (val >= guessState.min) guessState.min = val + 1;
+        }
+
+        // 防止 min, max 交叉導致顯示奇怪的結果
+        if (guessState.min > guessState.max) {
+          guessState.min = guessState.max;
+        }
+        if (!guessState.gameOver) {
+          $("guess-range").textContent = `${guessState.min} ~ ${guessState.max}`;
+        }
+
+        // 清空輸入框方便下次輸入
+        $("guess-input").value = "";
+        $("guess-input").focus();
+      }
+
+      $("btn-guess-submit").addEventListener("click", handleGuess);
+      $("guess-input").addEventListener("keypress", (e) => {
+        if (e.key === "Enter") handleGuess();
+      });
+      $("btn-guess-reset").addEventListener("click", initGuessGame);
+
+      /* ==============================================================
+           互動挑戰區邏輯
+           ============================================================== */
+      let chalIsSorted = false;
+
+      function generateChallenge() {
+        $("chal-feedback").style.display = "none";
+        $("btn-chal-next").style.display = "none";
+        $("btn-guess-lin").disabled = false;
+        $("btn-guess-bin").disabled = false;
+        $("chal-feedback").className = "message-area";
+
+        // 隨機決定是否排序 (各 50%)
+        chalIsSorted = Math.random() > 0.5;
+
+        let arr = Array.from({ length: 8 }, () => Math.floor(Math.random() * 90) + 10);
+
+        if (chalIsSorted) {
+          arr.sort((a, b) => a - b);
+        } else {
+          // 確保真的沒排序
+          arr = [56, 12, 89, 34, 7, 45, 23, 67];
+        }
+
+        // 隨機挑一個目標 (可能在陣列內，也可能不在)
+        let target = arr[Math.floor(Math.random() * arr.length)];
+        if (Math.random() > 0.8) target = 99; // 20% 機率不在陣列內
+
+        $("chal-array").textContent = `[ ${arr.join(", ")} ]`;
+        $("chal-target").textContent = target;
+      }
+
+      function checkChallenge(guess) {
+        $("btn-guess-lin").disabled = true;
+        $("btn-guess-bin").disabled = true;
+        const fb = $("chal-feedback");
+        fb.style.display = "block";
+        $("btn-chal-next").style.display = "inline-block";
+
+        if (guess === "linear") {
+          if (chalIsSorted) {
+            fb.textContent = `💡 雖然循序搜尋可以用，但這組資料【已經排序】了，使用二元搜尋會更快喔！`;
+            fb.className = "message-area msg-info";
+          } else {
+            fb.textContent = `✅ 答對了！這組資料【沒有排序】，所以只能用循序搜尋，從頭乖乖找。`;
+            fb.className = "message-area msg-success";
+          }
+        } else if (guess === "binary") {
+          if (chalIsSorted) {
+            fb.textContent = `✅ 聰明！這組資料【已經排序】，使用二元搜尋效率最高！`;
+            fb.className = "message-area msg-success";
+          } else {
+            fb.textContent = `❌ 哎呀！這組資料【沒有排序】，二元搜尋會找錯方向喔。必須先排序才能用！`;
+            fb.className = "message-area msg-error";
+          }
+        }
+      }
+
+      $("btn-guess-lin").addEventListener("click", () => checkChallenge("linear"));
+      $("btn-guess-bin").addEventListener("click", () => checkChallenge("binary"));
+      $("btn-chal-next").addEventListener("click", generateChallenge);
+
+      /* ==============================================================
+           資料量模擬器邏輯
+           ============================================================== */
+      function updateSimulator() {
+        const power = parseInt($("data-size-slider").value);
+        const n = Math.pow(2, power); // 8, 16, 32... 2048
+
+        $("data-size-display").textContent = n;
+
+        const linMax = n;
+        // Binary search max steps = floor(log2(N)) + 1
+        const binMax = Math.floor(Math.log2(n)) + 1;
+
+        $("chart-val-lin").textContent = `最多 ${linMax} 次`;
+        $("chart-val-bin").textContent = `最多 ${binMax} 次`;
+
+        // 計算長條圖寬度比例。循序搜尋永遠是 100% 基準
+        $("bar-linear").style.width = "100%";
+        // 避免數值太小看不見，給個最低寬度百分比
+        let binPercent = (binMax / linMax) * 100;
+        if (binPercent < 2) binPercent = 2; // 至少顯示一點點
+        $("bar-binary").style.width = `${binPercent}%`;
+      }
+
+      $("data-size-slider").addEventListener("input", updateSimulator);
+
+      /* ==============================================================
+           Scratch 分頁切換邏輯
+           ============================================================== */
+      $("tab-btn-linear").addEventListener("click", () => {
+        $("tab-btn-linear").classList.add("active");
+        $("tab-btn-binary").classList.remove("active");
+        $("tab-content-linear").classList.add("active");
+        $("tab-content-binary").classList.remove("active");
+      });
+
+      $("tab-btn-binary").addEventListener("click", () => {
+        $("tab-btn-binary").classList.add("active");
+        $("tab-btn-linear").classList.remove("active");
+        $("tab-content-binary").classList.add("active");
+        $("tab-content-linear").classList.remove("active");
+      });
+
+      /* ==============================================================
+   Scratch .sb3 半完成版下載：修正版
+   ============================================================== */
+
+      function scratchText(text) {
+        return [1, [10, text]];
+      }
+
+      function scratchNumber(num) {
+        return [1, [4, String(num)]];
+      }
+
+      function block(opcode, next = null, parent = null, inputs = {}, fields = {}, topLevel = false, x = 0, y = 0) {
+        return {
+          opcode,
+          next,
+          parent,
+          inputs,
+          fields,
+          shadow: false,
+          topLevel,
+          x,
+          y,
+        };
+      }
+
+      function createStageSvg() {
+        return `<svg version="1.1" width="480" height="360" viewBox="0 0 480 360" xmlns="http://www.w3.org/2000/svg">
+  <rect width="480" height="360" fill="#fffaf0"/>
+  <circle cx="420" cy="60" r="70" fill="#ffe095"/>
+  <circle cx="48" cy="320" r="52" fill="#91cdf2" opacity="0.65"/>
+  <text x="240" y="190" text-anchor="middle" font-size="34" font-family="Arial, sans-serif" fill="#22313a" font-weight="bold">搜尋演算法練習</text>
+</svg>`;
+      }
+
+      function createSpriteSvg() {
+        return `<svg version="1.1" width="96" height="100" viewBox="0 0 96 100" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="48" cy="50" r="38" fill="#ffcc4d" stroke="#22313a" stroke-width="5"/>
+  <circle cx="35" cy="42" r="5" fill="#22313a"/>
+  <circle cx="61" cy="42" r="5" fill="#22313a"/>
+  <path d="M32 62 Q48 76 64 62" fill="none" stroke="#22313a" stroke-width="5" stroke-linecap="round"/>
+</svg>`;
+      }
+
+      function createHalfFinishedScratchProject(mode) {
+        const isLinear = mode === "linear";
+
+        const dataList = isLinear ? [12, 45, 24, 8, 31, 67] : [5, 12, 18, 24, 31, 45, 67, 80];
+
+        const targetNumber = isLinear ? 24 : 31;
+
+        const spriteName = isLinear ? "循序搜尋練習" : "二元搜尋練習";
+
+        const titleText = isLinear ? "循序搜尋半完成版" : "二元搜尋半完成版";
+
+        const guideText = isLinear ? "請完成：從第 1 項開始，一個一個檢查資料清單。" : "請完成：使用 L、R、M，每次排除一半資料。";
+
+        /*
+      重要：
+      這裡改成類似 Scratch 慣用的 md5 檔名格式。
+      Scratch 比較不容易拒絕。
+    */
+        const stageAssetId = "cd21514d0531fdffb22204e0ec5ed84a";
+        const spriteAssetId = "bcf454acf82e4504149f7ffe07081dbc";
+
+        const variables = isLinear
+          ? {
+              "var-target": ["目標數字", targetNumber],
+              "var-i": ["i", 1],
+              "var-answer": ["找到位置", 0],
+            }
+          : {
+              "var-target": ["目標數字", targetNumber],
+              "var-l": ["L", 1],
+              "var-r": ["R", dataList.length],
+              "var-m": ["M", 0],
+              "var-answer": ["找到位置", 0],
+            };
+
+        const lists = {
+          "list-data": ["資料清單", dataList],
+        };
+
+        const blocks = {};
+
+        blocks["event-green-flag"] = block("event_whenflagclicked", "say-title", null, {}, {}, true, 80, 80);
+
+        blocks["say-title"] = block("looks_sayforsecs", isLinear ? "set-target-linear" : "set-target-binary", "event-green-flag", {
+          MESSAGE: scratchText(titleText),
+          SECS: scratchNumber(2),
+        });
+
+        if (isLinear) {
+          blocks["set-target-linear"] = block(
+            "data_setvariableto",
+            "set-i-linear",
+            "say-title",
+            {
+              VALUE: scratchNumber(targetNumber),
+            },
+            {
+              VARIABLE: ["目標數字", "var-target"],
+            },
+          );
+
+          blocks["set-i-linear"] = block(
+            "data_setvariableto",
+            "set-answer-linear",
+            "set-target-linear",
+            {
+              VALUE: scratchNumber(1),
+            },
+            {
+              VARIABLE: ["i", "var-i"],
+            },
+          );
+
+          blocks["set-answer-linear"] = block(
+            "data_setvariableto",
+            "say-guide-linear",
+            "set-i-linear",
+            {
+              VALUE: scratchNumber(0),
+            },
+            {
+              VARIABLE: ["找到位置", "var-answer"],
+            },
+          );
+
+          blocks["say-guide-linear"] = block("looks_sayforsecs", "say-task-linear", "set-answer-linear", {
+            MESSAGE: scratchText(guideText),
+            SECS: scratchNumber(4),
+          });
+
+          blocks["say-task-linear"] = block("looks_sayforsecs", null, "say-guide-linear", {
+            MESSAGE: scratchText("學生任務：加入重複直到、如果、清單第 i 項、i 改變 1。"),
+            SECS: scratchNumber(5),
+          });
+        } else {
+          blocks["set-target-binary"] = block(
+            "data_setvariableto",
+            "set-l-binary",
+            "say-title",
+            {
+              VALUE: scratchNumber(targetNumber),
+            },
+            {
+              VARIABLE: ["目標數字", "var-target"],
+            },
+          );
+
+          blocks["set-l-binary"] = block(
+            "data_setvariableto",
+            "set-r-binary",
+            "set-target-binary",
+            {
+              VALUE: scratchNumber(1),
+            },
+            {
+              VARIABLE: ["L", "var-l"],
+            },
+          );
+
+          blocks["set-r-binary"] = block(
+            "data_setvariableto",
+            "set-m-binary",
+            "set-l-binary",
+            {
+              VALUE: scratchNumber(dataList.length),
+            },
+            {
+              VARIABLE: ["R", "var-r"],
+            },
+          );
+
+          blocks["set-m-binary"] = block(
+            "data_setvariableto",
+            "set-answer-binary",
+            "set-r-binary",
+            {
+              VALUE: scratchNumber(0),
+            },
+            {
+              VARIABLE: ["M", "var-m"],
+            },
+          );
+
+          blocks["set-answer-binary"] = block(
+            "data_setvariableto",
+            "say-guide-binary",
+            "set-m-binary",
+            {
+              VALUE: scratchNumber(0),
+            },
+            {
+              VARIABLE: ["找到位置", "var-answer"],
+            },
+          );
+
+          blocks["say-guide-binary"] = block("looks_sayforsecs", "say-task-binary", "set-answer-binary", {
+            MESSAGE: scratchText(guideText),
+            SECS: scratchNumber(4),
+          });
+
+          blocks["say-task-binary"] = block("looks_sayforsecs", null, "say-guide-binary", {
+            MESSAGE: scratchText("學生任務：加入重複直到 L > R、計算 M、比較清單第 M 項。"),
+            SECS: scratchNumber(5),
+          });
+        }
+
+        const project = {
+          targets: [
+            {
+              isStage: true,
+              name: "Stage",
+              variables: {},
+              lists: {},
+              broadcasts: {},
+              blocks: {},
+              comments: {},
+              currentCostume: 0,
+              costumes: [
+                {
+                  assetId: stageAssetId,
+                  name: "背景",
+                  md5ext: `${stageAssetId}.svg`,
+                  dataFormat: "svg",
+                  rotationCenterX: 240,
+                  rotationCenterY: 180,
+                },
+              ],
+              sounds: [],
+              volume: 100,
+              layerOrder: 0,
+              tempo: 60,
+              videoTransparency: 50,
+              videoState: "on",
+              textToSpeechLanguage: null,
+            },
+            {
+              isStage: false,
+              name: spriteName,
+              variables,
+              lists,
+              broadcasts: {},
+              blocks,
+              comments: {},
+              currentCostume: 0,
+              costumes: [
+                {
+                  assetId: spriteAssetId,
+                  name: "搜尋助手",
+                  md5ext: `${spriteAssetId}.svg`,
+                  dataFormat: "svg",
+                  rotationCenterX: 48,
+                  rotationCenterY: 50,
+                },
+              ],
+              sounds: [],
+              volume: 100,
+              layerOrder: 1,
+              visible: true,
+              x: 0,
+              y: 0,
+              size: 100,
+              direction: 90,
+              draggable: false,
+              rotationStyle: "all around",
+            },
+          ],
+          monitors: [],
+          extensions: [],
+          meta: {
+            semver: "3.0.0",
+            vm: "0.2.0",
+            agent: "Generated from HTML teaching website",
+          },
+        };
+
+        return {
+          project,
+          files: {
+            [`${stageAssetId}.svg`]: createStageSvg(),
+            [`${spriteAssetId}.svg`]: createSpriteSvg(),
+          },
+        };
+      }
+
+      async function downloadScratchSb3(mode) {
+        if (typeof JSZip === "undefined") {
+          alert("JSZip 尚未載入。請確認 head 裡有加入 JSZip CDN。");
+          return;
+        }
+
+        const zip = new JSZip();
+        const result = createHalfFinishedScratchProject(mode);
+
+        zip.file("project.json", JSON.stringify(result.project));
+
+        Object.entries(result.files).forEach(([filename, content]) => {
+          zip.file(filename, content);
+        });
+
+        const blob = await zip.generateAsync({
+          type: "blob",
+          compression: "DEFLATE",
+        });
+
+        const filename = mode === "linear" ? "循序搜尋_半完成版.sb3" : "二元搜尋_半完成版.sb3";
+
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+
+        URL.revokeObjectURL(a.href);
+      }
+
+      function initScratchDownloadButtons() {
+        const linearBtn = $("download-linear-sb3");
+        const binaryBtn = $("download-binary-sb3");
+
+        if (linearBtn) {
+          linearBtn.addEventListener("click", () => downloadScratchSb3("linear"));
+        }
+
+        if (binaryBtn) {
+          binaryBtn.addEventListener("click", () => downloadScratchSb3("binary"));
+        }
+      }
+
+      /* ==============================================================
+   Scratch .sb3 作業檢查器
+   ============================================================== */
+
+      /* ==============================================================
+   Scratch .sb3 作業檢查器：嚴格版
+   目的：
+   1. 不把老師預先準備好的清單、變數、角色、綠旗、說明文字算分
+   2. 只檢查學生是否補上搜尋演算法的主要邏輯
+   ============================================================== */
+
+      async function readSb3Project(file) {
+        if (typeof JSZip === "undefined") {
+          throw new Error("JSZip 尚未載入，請確認 head 裡有加入 JSZip CDN。");
+        }
+
+        const zip = await JSZip.loadAsync(file);
+        const projectFile = zip.file("project.json");
+
+        if (!projectFile) {
+          throw new Error("這個 .sb3 裡找不到 project.json，可能不是有效的 Scratch 3 專案。");
+        }
+
+        const projectText = await projectFile.async("text");
+        return JSON.parse(projectText);
+      }
+
+      function collectScratchInfo(project) {
+        const info = {
+          variableNames: [],
+          listNames: [],
+          opcodes: [],
+          fieldsText: [],
+          inputsText: [],
+          allText: "",
+        };
+
+        project.targets.forEach((target) => {
+          if (target.variables) {
+            Object.values(target.variables).forEach((variableData) => {
+              info.variableNames.push(variableData[0]);
+            });
+          }
+
+          if (target.lists) {
+            Object.values(target.lists).forEach((listData) => {
+              info.listNames.push(listData[0]);
+            });
+          }
+
+          if (target.blocks) {
+            Object.values(target.blocks).forEach((block) => {
+              if (!block || typeof block !== "object") return;
+
+              if (block.opcode) {
+                info.opcodes.push(block.opcode);
+              }
+
+              if (block.fields) {
+                info.fieldsText.push(JSON.stringify(block.fields));
+              }
+
+              if (block.inputs) {
+                info.inputsText.push(JSON.stringify(block.inputs));
+              }
+            });
+          }
+        });
+
+        info.allText = [...info.variableNames, ...info.listNames, ...info.opcodes, ...info.fieldsText, ...info.inputsText].join(" ");
+
+        return info;
+      }
+
+      function hasAnyOpcode(info, opcodeList) {
+        return opcodeList.some((opcode) => info.opcodes.includes(opcode));
+      }
+
+      function hasText(info, keyword) {
+        return info.allText.includes(keyword);
+      }
+
+      /* ==============================================================
+   綠旗程式追蹤工具
+   只收集「綠旗下面真的接起來」的積木
+   ============================================================== */
+
+      function getBlocksConnectedToGreenFlag(project) {
+        const connectedBlocks = [];
+
+        project.targets.forEach((target) => {
+          if (!target.blocks) return;
+
+          const blocks = target.blocks;
+
+          Object.entries(blocks).forEach(([blockId, blockData]) => {
+            if (!blockData || typeof blockData !== "object") return;
+
+            if (blockData.opcode === "event_whenflagclicked") {
+              const visited = new Set();
+
+              function walk(currentId) {
+                if (!currentId) return;
+                if (visited.has(currentId)) return;
+
+                const currentBlock = blocks[currentId];
+                if (!currentBlock || typeof currentBlock !== "object") return;
+
+                visited.add(currentId);
+
+                connectedBlocks.push({
+                  id: currentId,
+                  spriteName: target.name,
+                  block: currentBlock,
+                });
+
+                // 追蹤 inputs 裡面的積木：
+                // 例如 repeat until 的條件、if 的條件、清單第幾項、等於比較等。
+                if (currentBlock.inputs) {
+                  Object.values(currentBlock.inputs).forEach((input) => {
+                    const nestedBlockIds = findNestedBlockIds(input);
+
+                    nestedBlockIds.forEach((nestedBlockId) => {
+                      walk(nestedBlockId);
+                    });
+                  });
+                }
+
+                // 追蹤下一個接在下面的積木
+                if (currentBlock.next) {
+                  walk(currentBlock.next);
+                }
+              }
+
+              walk(blockId);
+            }
+          });
+        });
+
+        return connectedBlocks;
+      }
+
+      function findNestedBlockIds(input) {
+        /*
+      Scratch input 可能長這樣：
+
+      [2, "block-id"]
+      [3, "block-id", [10, "文字"]]
+      [1, [10, "hello"]]
+      [2, "SUBSTACK第一個積木ID"]
+
+      這個函式會把裡面所有可能的 block id 找出來。
+    */
+
+        const ids = [];
+
+        function search(value) {
+          if (!Array.isArray(value)) return;
+
+          value.forEach((item) => {
+            if (typeof item === "string") {
+              ids.push(item);
+            } else if (Array.isArray(item)) {
+              search(item);
+            }
+          });
+        }
+
+        search(input);
+
+        return ids;
+      }
+
+      function collectScratchInfoFromBlocks(connectedBlocks) {
+        const info = {
+          variableNames: [],
+          listNames: [],
+          opcodes: [],
+          fieldsText: [],
+          inputsText: [],
+          allText: "",
+          connectedBlocks,
+        };
+
+        connectedBlocks.forEach((item) => {
+          const block = item.block;
+
+          if (!block || typeof block !== "object") return;
+
+          if (block.opcode) {
+            info.opcodes.push(block.opcode);
+          }
+
+          if (block.fields) {
+            info.fieldsText.push(JSON.stringify(block.fields));
+          }
+
+          if (block.inputs) {
+            info.inputsText.push(JSON.stringify(block.inputs));
+          }
+        });
+
+        info.allText = [...info.opcodes, ...info.fieldsText, ...info.inputsText].join(" ");
+
+        return info;
+      }
+
+      /* ==============================================================
+   循序搜尋檢查
+   只檢查學生應該補上的主要邏輯
+   ============================================================== */
+
+      function checkLinearSearchProject(info) {
+        const hasRepeatUntil = hasAnyOpcode(info, ["control_repeat_until"]);
+
+        const hasAnyLoop = hasAnyOpcode(info, ["control_repeat_until", "control_repeat", "control_forever"]);
+
+        const hasIf = hasAnyOpcode(info, ["control_if", "control_if_else"]);
+
+        const hasEquals = hasAnyOpcode(info, ["operator_equals"]);
+
+        const hasListItem = hasAnyOpcode(info, ["data_itemoflist"]);
+
+        const hasListLength = hasAnyOpcode(info, ["data_lengthoflist"]);
+
+        const hasChangeVariable = hasAnyOpcode(info, ["data_changevariableby"]);
+
+        const hasStop = hasAnyOpcode(info, ["control_stop"]);
+
+        const hasLessOrGreater = hasAnyOpcode(info, ["operator_lt", "operator_gt"]);
+
+        return [
+          {
+            label: "有使用「重複直到」作為主要搜尋迴圈",
+            pass: hasRepeatUntil,
+          },
+          {
+            label: "有使用如果判斷，檢查目前資料是否等於目標",
+            pass: hasIf,
+          },
+          {
+            label: "有使用等於比較，例如：資料清單第 i 項 = 目標數字",
+            pass: hasEquals,
+          },
+          {
+            label: "有讀取清單中的某一項，例如：資料清單第 i 項",
+            pass: hasListItem,
+          },
+          {
+            label: "有使用清單長度，避免搜尋超出範圍",
+            pass: hasListLength,
+          },
+          {
+            label: "有讓 i 改變，例如：i 改變 1",
+            pass: hasChangeVariable,
+          },
+          {
+            label: "有處理找不到或停止搜尋的情況",
+            pass: hasStop || hasListLength || hasLessOrGreater,
+          },
+          {
+            label: "看起來有完成循序搜尋的主要邏輯",
+            pass: hasAnyLoop && hasIf && hasEquals && hasListItem && hasChangeVariable,
+          },
+        ];
+      }
+
+      /* ==============================================================
+   二元搜尋檢查
+   只檢查學生應該補上的主要邏輯
+   ============================================================== */
+
+      function checkBinarySearchProject(info) {
+        const hasRepeatUntil = hasAnyOpcode(info, ["control_repeat_until"]);
+
+        const hasIf = hasAnyOpcode(info, ["control_if", "control_if_else"]);
+
+        const hasIfElse = hasAnyOpcode(info, ["control_if_else"]);
+
+        const hasEquals = hasAnyOpcode(info, ["operator_equals"]);
+
+        const hasLessOrGreater = hasAnyOpcode(info, ["operator_lt", "operator_gt"]);
+
+        const hasAdd = hasAnyOpcode(info, ["operator_add"]);
+
+        const hasSubtract = hasAnyOpcode(info, ["operator_subtract"]);
+
+        const hasDivide = hasAnyOpcode(info, ["operator_divide"]);
+
+        const hasRoundOrMath = hasAnyOpcode(info, ["operator_round", "operator_mathop"]);
+
+        const hasListItem = hasAnyOpcode(info, ["data_itemoflist"]);
+
+        /*
+      注意：
+      data_setvariableto 在你的半完成版預設就有，
+      所以不能單獨拿來算分。
+      這裡只在「已經有比較和 M 計算」的情況下，
+      才拿它判斷是否可能有更新 L / R。
+    */
+        const hasSetVariable = hasAnyOpcode(info, ["data_setvariableto"]);
+
+        return [
+          {
+            label: "有使用「重複直到」作為主要搜尋迴圈",
+            pass: hasRepeatUntil,
+          },
+          {
+            label: "有使用加法計算中間位置 M，例如 L + R",
+            pass: hasAdd,
+          },
+          {
+            label: "有使用除法計算中間位置 M，例如 (L + R) / 2",
+            pass: hasDivide,
+          },
+          {
+            label: "有處理 M 的整數位置，例如四捨五入或向下取整",
+            pass: hasRoundOrMath,
+          },
+          {
+            label: "有讀取清單中的某一項，例如：資料清單第 M 項",
+            pass: hasListItem,
+          },
+          {
+            label: "有使用等於比較，判斷是否找到目標",
+            pass: hasEquals,
+          },
+          {
+            label: "有使用大於或小於比較，判斷往左或往右找",
+            pass: hasLessOrGreater,
+          },
+          {
+            label: "有使用如果 / 否則判斷，處理不同搜尋方向",
+            pass: hasIf && hasIfElse,
+          },
+          {
+            label: "有更新搜尋邊界，例如 L = M + 1 或 R = M - 1",
+            pass: hasSetVariable && hasLessOrGreater && (hasAdd || hasSubtract),
+          },
+          {
+            label: "看起來有完成二元搜尋的主要邏輯",
+            pass: hasRepeatUntil && hasIf && hasEquals && hasLessOrGreater && hasListItem && hasAdd && hasDivide && hasSetVariable,
+          },
+        ];
+      }
+
+      /* ==============================================================
+   顯示檢查結果
+   ============================================================== */
+
+      function renderSb3CheckResult(results, mode) {
+        const resultBox = $("sb3-check-result");
+        const passed = results.filter((item) => item.pass).length;
+        const total = results.length;
+        const percent = Math.round((passed / total) * 100);
+
+        let comment = "";
+
+        if (percent >= 85) {
+          comment = "很完整！看起來你已經完成主要搜尋邏輯。";
+        } else if (percent >= 60) {
+          comment = "有完成一部分，但還有幾個關鍵邏輯需要補上。";
+        } else if (percent >= 30) {
+          comment = "已經開始有一些搜尋邏輯，但還需要補上迴圈、判斷、清單讀取或變數更新。";
+        } else {
+          comment = "目前主要邏輯還太少，請回到 Scratch 補上搜尋流程。";
+        }
+
+        const taskName = mode === "linear" ? "循序搜尋" : "二元搜尋";
+
+        resultBox.style.display = "block";
+        resultBox.innerHTML = `
+        <div class="check-score">
+            ${taskName} 檢查結果：${passed} / ${total} 項通過（${percent}%）
+        </div>
+
+        <p>${comment}</p>
+
+        <p style="color: var(--text-light);">
+            系統主要檢查你完成的搜尋邏輯；老師預先準備好的清單、變數、角色、綠旗和說明文字不列入主要分數。
+        </p>
+
+        <ul>
+            ${results
+              .map(
+                (item) => `
+                <li class="${item.pass ? "check-pass" : "check-fail"}">
+                    ${item.pass ? "✅" : "❌"} ${item.label}
+                </li>
+            `,
+              )
+              .join("")}
+        </ul>
+
+        <p style="margin-top: 1rem; color: var(--text-light);">
+            小提醒：這是結構檢查，不代表程式一定完全正確。請還是要在 Scratch 裡實際按綠旗測試。
+        </p>
+    `;
+      }
+
+      /* ==============================================================
+   上傳並檢查 .sb3
+   ============================================================== */
+
+      async function checkUploadedSb3() {
+        const fileInput = $("sb3-upload");
+        const mode = $("checker-mode").value;
+
+        if (!fileInput.files || fileInput.files.length === 0) {
+          alert("請先選擇一個 .sb3 檔案。");
+          return;
+        }
+
+        const file = fileInput.files[0];
+
+        if (!file.name.toLowerCase().endsWith(".sb3")) {
+          alert("請上傳 Scratch 的 .sb3 檔案。");
+          return;
+        }
+
+        try {
+          const project = await readSb3Project(file);
+
+          // 整個專案資訊：只拿來輔助確認有沒有基本清單/變數，不直接計分
+          const wholeProjectInfo = collectScratchInfo(project);
+
+          // 真正計分：只看綠旗下面實際接起來的程式
+          const connectedBlocks = getBlocksConnectedToGreenFlag(project);
+          const greenFlagInfo = collectScratchInfoFromBlocks(connectedBlocks);
+
+          const results = mode === "linear" ? checkLinearSearchGreenFlagProject(greenFlagInfo, wholeProjectInfo) : checkBinarySearchGreenFlagProject(greenFlagInfo, wholeProjectInfo);
+
+          renderSb3CheckResult(results, mode);
+        } catch (error) {
+          const resultBox = $("sb3-check-result");
+          resultBox.style.display = "block";
+          resultBox.innerHTML = `
+            <div class="check-score check-fail">檢查失敗</div>
+            <p>${error.message}</p>
+            <p>請確認你上傳的是 Scratch 3 的 .sb3 專案檔。</p>
+        `;
+        }
+      }
+
+      function checkLinearSearchGreenFlagProject(greenInfo, projectInfo) {
+        const hasRepeatUntil = hasAnyOpcode(greenInfo, ["control_repeat_until"]);
+
+        const hasAnyLoop = hasAnyOpcode(greenInfo, ["control_repeat_until", "control_repeat", "control_forever"]);
+
+        const hasIf = hasAnyOpcode(greenInfo, ["control_if", "control_if_else"]);
+
+        const hasEquals = hasAnyOpcode(greenInfo, ["operator_equals"]);
+
+        const hasLessOrGreater = hasAnyOpcode(greenInfo, ["operator_lt", "operator_gt"]);
+
+        const hasListItem = hasAnyOpcode(greenInfo, ["data_itemoflist"]);
+
+        const hasListLength = hasAnyOpcode(greenInfo, ["data_lengthoflist"]);
+
+        const hasChangeVariable = hasAnyOpcode(greenInfo, ["data_changevariableby"]);
+
+        const hasStop = hasAnyOpcode(greenInfo, ["control_stop"]);
+
+        return [
+          {
+            label: "綠旗程式中有使用「重複直到」作為主要搜尋迴圈",
+            pass: hasRepeatUntil,
+          },
+          {
+            label: "綠旗程式中有使用如果判斷",
+            pass: hasIf,
+          },
+          {
+            label: "綠旗程式中有使用等於比較，例如：資料清單第 i 項 = 目標數字",
+            pass: hasEquals,
+          },
+          {
+            label: "綠旗程式中有讀取清單中的某一項，例如：資料清單第 i 項",
+            pass: hasListItem,
+          },
+          {
+            label: "綠旗程式中有使用清單長度，避免搜尋超出範圍",
+            pass: hasListLength,
+          },
+          {
+            label: "綠旗程式中有讓 i 改變，例如：i 改變 1",
+            pass: hasChangeVariable,
+          },
+          {
+            label: "綠旗程式中有處理找不到或停止搜尋的情況",
+            pass: hasStop || hasListLength || hasLessOrGreater,
+          },
+          {
+            label: "看起來有完成循序搜尋的主要邏輯",
+            pass: hasAnyLoop && hasIf && hasEquals && hasListItem && hasChangeVariable,
+          },
+        ];
+      }
+
+      function checkBinarySearchGreenFlagProject(greenInfo, projectInfo) {
+        const hasRepeatUntil = hasAnyOpcode(greenInfo, ["control_repeat_until"]);
+
+        const hasIf = hasAnyOpcode(greenInfo, ["control_if", "control_if_else"]);
+
+        const hasIfElse = hasAnyOpcode(greenInfo, ["control_if_else"]);
+
+        const hasEquals = hasAnyOpcode(greenInfo, ["operator_equals"]);
+
+        const hasLessOrGreater = hasAnyOpcode(greenInfo, ["operator_lt", "operator_gt"]);
+
+        const hasAdd = hasAnyOpcode(greenInfo, ["operator_add"]);
+
+        const hasSubtract = hasAnyOpcode(greenInfo, ["operator_subtract"]);
+
+        const hasDivide = hasAnyOpcode(greenInfo, ["operator_divide"]);
+
+        const hasRoundOrMath = hasAnyOpcode(greenInfo, ["operator_round", "operator_mathop"]);
+
+        const hasListItem = hasAnyOpcode(greenInfo, ["data_itemoflist"]);
+
+        const hasSetVariable = hasAnyOpcode(greenInfo, ["data_setvariableto"]);
+
+        return [
+          {
+            label: "綠旗程式中有使用「重複直到」作為主要搜尋迴圈",
+            pass: hasRepeatUntil,
+          },
+          {
+            label: "綠旗程式中有使用加法計算中間位置 M，例如 L + R",
+            pass: hasAdd,
+          },
+          {
+            label: "綠旗程式中有使用除法計算中間位置 M，例如 (L + R) / 2",
+            pass: hasDivide,
+          },
+          {
+            label: "綠旗程式中有處理 M 的整數位置，例如四捨五入或向下取整",
+            pass: hasRoundOrMath,
+          },
+          {
+            label: "綠旗程式中有讀取清單中的某一項，例如：資料清單第 M 項",
+            pass: hasListItem,
+          },
+          {
+            label: "綠旗程式中有使用等於比較，判斷是否找到目標",
+            pass: hasEquals,
+          },
+          {
+            label: "綠旗程式中有使用大於或小於比較，判斷往左或往右找",
+            pass: hasLessOrGreater,
+          },
+          {
+            label: "綠旗程式中有使用如果 / 否則判斷，處理不同搜尋方向",
+            pass: hasIf && hasIfElse,
+          },
+          {
+            label: "綠旗程式中有更新搜尋邊界，例如 L = M + 1 或 R = M - 1",
+            pass: hasSetVariable && hasLessOrGreater && (hasAdd || hasSubtract),
+          },
+          {
+            label: "看起來有完成二元搜尋的主要邏輯",
+            pass: hasRepeatUntil && hasIf && hasEquals && hasLessOrGreater && hasListItem && hasAdd && hasDivide && hasSetVariable,
+          },
+        ];
+      }
+
+      function initSb3Checker() {
+        const checkBtn = $("check-sb3-btn");
+
+        if (checkBtn) {
+          checkBtn.addEventListener("click", checkUploadedSb3);
+        }
+      }
+      /* ==============================================================
+           初始化執行
+           ============================================================== */
+      window.onload = () => {
+        initLinear();
+        initBinary();
+        initGuessGame();
+        generateChallenge();
+        updateSimulator();
+        initScratchDownloadButtons();
+        initSb3Checker();
+      };
+    </script>
+  </body>
+</html>
