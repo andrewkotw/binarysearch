@@ -2284,6 +2284,45 @@
         };
       }
 
+      function createVariableMonitor(id, name, value, spriteName, x, y) {
+        return {
+          id,
+          mode: "default",
+          opcode: "data_variable",
+          params: {
+            VARIABLE: name,
+          },
+          spriteName,
+          value,
+          width: 0,
+          height: 0,
+          x,
+          y,
+          visible: true,
+          sliderMin: 0,
+          sliderMax: 100,
+          isDiscrete: true,
+        };
+      }
+
+      function createListMonitor(id, name, value, spriteName, x, y) {
+        return {
+          id,
+          mode: "list",
+          opcode: "data_listcontents",
+          params: {
+            LIST: name,
+          },
+          spriteName,
+          value,
+          width: 170,
+          height: 150,
+          x,
+          y,
+          visible: true,
+        };
+      }
+
       function createStageSvg() {
         return `<svg version="1.1" width="480" height="360" viewBox="0 0 480 360" xmlns="http://www.w3.org/2000/svg">
   <rect width="480" height="360" fill="#fffaf0"/>
@@ -2340,6 +2379,11 @@
         const lists = {
           "list-data": ["資料清單", dataList],
         };
+
+        const monitors = [
+          createListMonitor("list-data", "資料清單", dataList, spriteName, 16, 16),
+          ...Object.entries(variables).map(([id, [name, value]], index) => createVariableMonitor(id, name, value, spriteName, 200, 16 + index * 34)),
+        ];
 
         const blocks = {};
 
@@ -2528,7 +2572,7 @@
               rotationStyle: "all around",
             },
           ],
-          monitors: [],
+          monitors,
           extensions: [],
           meta: {
             semver: "3.0.0",
@@ -2673,6 +2717,54 @@
         return info.allText.includes(keyword);
       }
 
+      function getBlocksByOpcode(info, opcodeList) {
+        return info.connectedBlocks.map((item) => item.block).filter((block) => block && opcodeList.includes(block.opcode));
+      }
+
+      function getInputBlocks(info, block, inputName) {
+        const input = block.inputs?.[inputName];
+        if (!input) return [];
+
+        const nestedBlockIds = findNestedBlockIds(input);
+        const foundBlocks = [];
+        const visited = new Set();
+
+        function collect(blockId) {
+          if (!blockId || visited.has(blockId)) return;
+          visited.add(blockId);
+
+          const inputBlock = info.blockById?.[blockId];
+          if (!inputBlock) return;
+
+          foundBlocks.push(inputBlock);
+
+          Object.values(inputBlock.inputs || {}).forEach((nestedInput) => {
+            findNestedBlockIds(nestedInput).forEach(collect);
+          });
+        }
+
+        nestedBlockIds.forEach(collect);
+        return foundBlocks;
+      }
+
+      function inputHasOpcode(info, block, inputName, opcodeList) {
+        return getInputBlocks(info, block, inputName).some((inputBlock) => opcodeList.includes(inputBlock.opcode));
+      }
+
+      function inputHasText(info, block, inputName, keyword) {
+        return JSON.stringify(block.inputs?.[inputName] || "").includes(keyword) || getInputBlocks(info, block, inputName).some((inputBlock) => JSON.stringify(inputBlock).includes(keyword));
+      }
+
+      function blockSetsVariable(block, variableNames) {
+        const variableField = block.fields?.VARIABLE;
+        if (!Array.isArray(variableField)) return false;
+        return variableNames.includes(variableField[0]);
+      }
+
+      function blockChangesVariable(block, variableNames) {
+        return blockSetsVariable(block, variableNames);
+      }
+
       /* ==============================================================
    綠旗程式追蹤工具
    只收集「綠旗下面真的接起來」的積木
@@ -2773,12 +2865,15 @@
           inputsText: [],
           allText: "",
           connectedBlocks,
+          blockById: {},
         };
 
         connectedBlocks.forEach((item) => {
           const block = item.block;
 
           if (!block || typeof block !== "object") return;
+
+          info.blockById[item.id] = block;
 
           if (block.opcode) {
             info.opcodes.push(block.opcode);
@@ -3050,7 +3145,9 @@
 
         const hasListLength = hasAnyOpcode(greenInfo, ["data_lengthoflist"]);
 
-        const hasChangeVariable = hasAnyOpcode(greenInfo, ["data_changevariableby"]);
+        const changeVariableBlocks = getBlocksByOpcode(greenInfo, ["data_changevariableby"]);
+
+        const changesIndex = changeVariableBlocks.some((block) => blockChangesVariable(block, ["i"]));
 
         const hasStop = hasAnyOpcode(greenInfo, ["control_stop"]);
 
@@ -3077,7 +3174,7 @@
           },
           {
             label: "綠旗程式中有讓 i 改變，例如：i 改變 1",
-            pass: hasChangeVariable,
+            pass: changesIndex,
           },
           {
             label: "綠旗程式中有處理找不到或停止搜尋的情況",
@@ -3085,7 +3182,7 @@
           },
           {
             label: "看起來有完成循序搜尋的主要邏輯",
-            pass: hasAnyLoop && hasIf && hasEquals && hasListItem && hasChangeVariable,
+            pass: hasAnyLoop && hasIf && hasEquals && hasListItem && changesIndex,
           },
         ];
       }
@@ -3111,7 +3208,15 @@
 
         const hasListItem = hasAnyOpcode(greenInfo, ["data_itemoflist"]);
 
-        const hasSetVariable = hasAnyOpcode(greenInfo, ["data_setvariableto"]);
+        const setVariableBlocks = getBlocksByOpcode(greenInfo, ["data_setvariableto"]);
+
+        const setsMiddlePosition = setVariableBlocks.some((block) => blockSetsVariable(block, ["M"]) && inputHasOpcode(greenInfo, block, "VALUE", ["operator_add"]) && inputHasOpcode(greenInfo, block, "VALUE", ["operator_divide"]));
+
+        const updatesLeftBoundary = setVariableBlocks.some((block) => blockSetsVariable(block, ["L"]) && inputHasOpcode(greenInfo, block, "VALUE", ["operator_add"]) && inputHasText(greenInfo, block, "VALUE", "M"));
+
+        const updatesRightBoundary = setVariableBlocks.some((block) => blockSetsVariable(block, ["R"]) && inputHasOpcode(greenInfo, block, "VALUE", ["operator_subtract"]) && inputHasText(greenInfo, block, "VALUE", "M"));
+
+        const updatesSearchBoundary = updatesLeftBoundary || updatesRightBoundary;
 
         return [
           {
@@ -3120,11 +3225,11 @@
           },
           {
             label: "綠旗程式中有使用加法計算中間位置 M，例如 L + R",
-            pass: hasAdd,
+            pass: setsMiddlePosition || hasAdd,
           },
           {
             label: "綠旗程式中有使用除法計算中間位置 M，例如 (L + R) / 2",
-            pass: hasDivide,
+            pass: setsMiddlePosition || hasDivide,
           },
           {
             label: "綠旗程式中有處理 M 的整數位置，例如四捨五入或向下取整",
@@ -3148,11 +3253,11 @@
           },
           {
             label: "綠旗程式中有更新搜尋邊界，例如 L = M + 1 或 R = M - 1",
-            pass: hasSetVariable && hasLessOrGreater && (hasAdd || hasSubtract),
+            pass: updatesSearchBoundary,
           },
           {
             label: "看起來有完成二元搜尋的主要邏輯",
-            pass: hasRepeatUntil && hasIf && hasEquals && hasLessOrGreater && hasListItem && hasAdd && hasDivide && hasSetVariable,
+            pass: hasRepeatUntil && hasIf && hasEquals && hasLessOrGreater && hasListItem && setsMiddlePosition && updatesSearchBoundary,
           },
         ];
       }
