@@ -144,7 +144,7 @@
 
     <section id="quiz-section">
       <h2>測驗題目</h2>
-      <p>每題只有一個正確答案。選項會隨機排列，所以請仔細閱讀每個選項。</p>
+      <p>每題只有一個正確答案。題目與選項都會隨機排列，所以請仔細閱讀每個選項。</p>
       <div class="progress-wrap"><div id="progress-bar"></div></div>
       <p id="progress-text">已完成 0 / 10 題</p>
       <form id="quiz-form"></form>
@@ -197,6 +197,9 @@
       { question: "為什麼二元搜尋通常比循序搜尋快？", options: ["因為它每次都可以排除一半的搜尋範圍", "因為它不需要比較資料", "因為它可以不用清單", "因為它一定第一步就找到答案"], answer: 0, explain: "二元搜尋的威力在於每一輪都能讓搜尋範圍大幅縮小。" },
       { question: "如果一組資料是 [56, 12, 89, 34, 7]，要直接找某個數字，最安全的搜尋法是什麼？", options: ["二元搜尋，因為它一定最快", "循序搜尋，因為資料還沒有排序", "兩種都不能用", "只看中間那一個就好"], answer: 1, explain: "這組資料沒有排序，直接使用二元搜尋可能會往錯方向排除。" }
     ];
+    questions.forEach((q, index) => {
+      q.originalNumber = index + 1;
+    });
 
     const form = document.getElementById("quiz-form");
     const progressBar = document.getElementById("progress-bar");
@@ -216,6 +219,12 @@
         q.options = shuffleArray(q.options);
         q.answer = q.options.indexOf(oldAnswerText);
       });
+    }
+
+    function randomizeQuestions() {
+      const shuffledQuestions = shuffleArray(questions);
+      questions.length = 0;
+      questions.push(...shuffledQuestions);
     }
 
     function letter(index) { return String.fromCharCode(65 + index); }
@@ -321,8 +330,10 @@
       const wrongQuestions = questions
         .map((q, index) => ({ q, index, selected: answers[index] }))
         .filter(item => item.selected !== item.q.answer)
+        .sort((a, b) => a.q.originalNumber - b.q.originalNumber)
         .map(item => ({
-          number: item.index + 1,
+          number: item.q.originalNumber,
+          displayNumber: item.index + 1,
           question: item.q.question,
           studentAnswer: `${letter(item.selected)}. ${item.q.options[item.selected]}`,
           correctAnswer: `${letter(item.q.answer)}. ${item.q.options[item.q.answer]}`,
@@ -340,7 +351,7 @@
         ...questions.map((q, index) => {
           const selected = answers[index];
           const isCorrect = selected === q.answer;
-          return `第 ${index + 1} 題：${isCorrect ? "正確" : "錯誤"}｜學生答案 ${letter(selected)}｜正確答案 ${letter(q.answer)}｜${q.question}`;
+          return `第 ${index + 1} 題（原第 ${q.originalNumber} 題）：${isCorrect ? "正確" : "錯誤"}｜學生答案 ${letter(selected)}｜正確答案 ${letter(q.answer)}｜${q.question}`;
         })
       ].join("\n");
       return { quizTitle: "搜尋演算法小測驗", name, classInfo, classNumber: classSeat.classNumber, seatNumber: classSeat.seatNumber, timeText, correct, wrong, total, percent, wrongQuestions, summary };
@@ -363,7 +374,7 @@
       document.getElementById("review-list").innerHTML = questions.map((q, index) => {
         const selected = answers[index];
         const isCorrect = selected === q.answer;
-        return `<div class="review-item ${isCorrect ? "pass" : "fail"}"><div class="review-title">${isCorrect ? "✓" : "✕"} 第 ${index + 1} 題：${q.question}</div><div>你的答案：${letter(selected)}. ${q.options[selected]}</div><div>正確答案：${letter(q.answer)}. ${q.options[q.answer]}</div><div>說明：${q.explain}</div></div>`;
+        return `<div class="review-item ${isCorrect ? "pass" : "fail"}"><div class="review-title">${isCorrect ? "✓" : "✕"} 第 ${index + 1} 題（原第 ${q.originalNumber} 題）：${q.question}</div><div>你的答案：${letter(selected)}. ${q.options[selected]}</div><div>正確答案：${letter(q.answer)}. ${q.options[q.answer]}</div><div>說明：${q.explain}</div></div>`;
       }).join("");
       submitToGoogleSheet(payload);
     }
@@ -418,6 +429,7 @@
       sheetStatus.textContent = GOOGLE_SHEET_WEB_APP_URL ? "交卷後會自動上傳成績。" : "成績上傳尚未設定。";
       sheetStatus.className = "sheet-status";
       randomizeQuestionOptions();
+      randomizeQuestions();
       renderQuiz();
       updateProgress();
       window.scrollTo({ top: 0, behavior: "smooth" });
@@ -432,6 +444,7 @@
     document.getElementById("start-focus-btn").addEventListener("click", () => document.getElementById("quiz-section").scrollIntoView({ behavior: "smooth" }));
 
     randomizeQuestionOptions();
+    randomizeQuestions();
     renderQuiz();
     updateProgress();
     sheetStatus.textContent = GOOGLE_SHEET_WEB_APP_URL ? "交卷後會自動上傳成績。" : "成績上傳尚未設定。";
