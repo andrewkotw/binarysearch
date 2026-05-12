@@ -6,708 +6,255 @@
   <title>搜尋演算法小測驗</title>
   <style>
     :root {
-      --bg-color: #f4efe3;
+      --bg: #f4efe3;
       --paper: #fffaf0;
-      --text-main: #22313a;
-      --text-light: #607c8b;
+      --ink: #22313a;
+      --muted: #607c8b;
       --line: #20323b;
       --primary: #2f6f88;
       --green: #a9ddb0;
       --blue: #91cdf2;
       --yellow: #ffe095;
       --pink: #f4b5c5;
-      --cream: #fff4bf;
       --error: #c94a4a;
-      --shadow-sm: 3px 3px 0 rgba(32, 50, 59, 0.18);
-      --shadow-md: 5px 6px 0 rgba(32, 50, 59, 0.18);
-      --shadow-lg: 8px 9px 0 rgba(32, 50, 59, 0.2);
+      --shadow: 5px 6px 0 rgba(32, 50, 59, 0.18);
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+    * { box-sizing: border-box; }
 
     body {
-      font-family: "Noto Sans TC", "Microsoft JhengHei", "PingFang TC", "Segoe UI", sans-serif;
+      margin: 0;
+      font-family: "Noto Sans TC", "Microsoft JhengHei", system-ui, sans-serif;
       background:
-        radial-gradient(circle at 12% 8%, rgba(255, 224, 149, 0.4) 0 8%, transparent 9%),
-        radial-gradient(circle at 90% 12%, rgba(244, 181, 197, 0.35) 0 9%, transparent 10%),
-        radial-gradient(circle at 85% 80%, rgba(145, 205, 242, 0.28) 0 12%, transparent 13%),
-        var(--bg-color);
-      color: var(--text-main);
+        radial-gradient(circle at 12% 10%, rgba(145, 205, 242, 0.35), transparent 26%),
+        radial-gradient(circle at 88% 18%, rgba(244, 181, 197, 0.35), transparent 24%),
+        var(--bg);
+      color: var(--ink);
       line-height: 1.8;
-      letter-spacing: 0.02em;
     }
 
-    .container {
-      max-width: 980px;
-      margin: 0 auto;
-      padding: 32px 20px 56px;
-    }
+    .container { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 56px; }
 
-    header,
-    section {
-      position: relative;
-      overflow: hidden;
-      background: var(--paper);
+    header, section {
+      background: rgba(255, 250, 240, 0.94);
       border: 4px solid var(--line);
-      border-radius: 30px;
-      padding: 38px;
-      margin-bottom: 32px;
-      box-shadow: var(--shadow-md);
+      border-radius: 28px;
+      box-shadow: var(--shadow);
+      padding: 28px;
+      margin-bottom: 24px;
     }
 
-    header {
-      text-align: center;
-      box-shadow: var(--shadow-lg);
-    }
+    h1, h2, h3 { margin: 0 0 12px; line-height: 1.25; }
+    h1 { font-size: clamp(2rem, 6vw, 4rem); font-weight: 900; }
+    h2 { font-size: clamp(1.5rem, 4vw, 2.2rem); }
+    p { margin: 0 0 14px; }
+    .subtitle { color: var(--muted); font-weight: 700; }
 
-    header::before,
-    section::before {
-      content: "";
-      position: absolute;
-      right: -42px;
-      top: -58px;
-      width: 170px;
-      height: 170px;
-      background: var(--yellow);
-      border-radius: 50%;
-      opacity: 0.75;
-    }
-
-    section:nth-of-type(2)::before { background: var(--green); }
-    section:nth-of-type(3)::before { background: var(--blue); }
-
-    h1 {
-      position: relative;
-      z-index: 1;
-      font-size: clamp(2rem, 5vw, 3.6rem);
-      line-height: 1.15;
-      margin-bottom: 14px;
-      font-weight: 900;
-    }
-
-    h2 {
-      position: relative;
-      z-index: 1;
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      font-size: clamp(1.55rem, 3vw, 2.25rem);
-      margin-bottom: 18px;
-      font-weight: 900;
-    }
-
-    h2::before {
-      content: "";
-      flex: 0 0 auto;
-      width: 28px;
-      height: 28px;
-      border-radius: 999px;
-      background: var(--line);
-    }
-
-    p {
-      position: relative;
-      z-index: 1;
-      margin-bottom: 16px;
-      font-size: 1.05rem;
-    }
-
-    .subtitle {
-      max-width: 760px;
-      margin: 0 auto 22px;
-      color: var(--text-light);
-      font-weight: 700;
-    }
-
-    .btn {
-      background-color: var(--cream);
-      color: var(--text-main);
-      border: 3px solid var(--line);
-      padding: 0.75rem 1.25rem;
-      font-size: 1rem;
-      border-radius: 999px;
-      cursor: pointer;
-      transition: transform 0.12s ease, box-shadow 0.12s ease, background-color 0.12s ease;
-      font-weight: 900;
-      text-decoration: none;
-      display: inline-block;
-      box-shadow: 3px 4px 0 rgba(32, 50, 59, 0.25);
-    }
-
-    .btn:hover:not(:disabled) {
-      background-color: #fff0a8;
-      transform: translate(-1px, -2px);
-      box-shadow: 5px 6px 0 rgba(32, 50, 59, 0.25);
-    }
-
-    .btn:disabled {
-      background-color: #e4ded0;
-      color: #9aa2a6;
-      cursor: not-allowed;
-      opacity: 0.75;
-      box-shadow: none;
-    }
-
-    .btn-green {
-      background-color: var(--green);
-    }
-
-    .btn-blue {
-      background-color: var(--blue);
-    }
-
-    .btn-pink {
-      background-color: var(--pink);
-    }
-
-    .top-actions,
-    .result-actions {
-      position: relative;
-      z-index: 1;
-      display: flex;
-      justify-content: center;
-      flex-wrap: wrap;
-      gap: 12px;
-      margin-top: 18px;
-    }
-
-    .student-info {
-      position: relative;
-      z-index: 1;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 14px;
-      margin-top: 20px;
-    }
-
-    .field {
-      background: #ffffff;
-      border: 3px solid var(--line);
-      border-radius: 18px;
-      padding: 14px;
-      box-shadow: var(--shadow-sm);
-    }
-
-    label {
-      display: block;
-      font-weight: 900;
-      margin-bottom: 6px;
-    }
+    .student-info { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin: 22px 0; }
+    label { font-weight: 900; }
 
     input[type="text"] {
       width: 100%;
-      padding: 0.75rem;
+      margin-top: 6px;
       border: 3px solid var(--line);
-      border-radius: 14px;
-      background: #fffdf7;
-      font-size: 1rem;
-      font-weight: 800;
-      color: var(--text-main);
-    }
-
-    .quiz-progress {
-      position: relative;
-      z-index: 1;
-      background: #ffffff;
-      border: 3px solid var(--line);
-      border-radius: 999px;
-      overflow: hidden;
-      height: 26px;
-      margin: 20px 0;
-      box-shadow: var(--shadow-sm);
-    }
-
-    .quiz-progress-bar {
-      height: 100%;
-      width: 0%;
-      background: var(--green);
-      transition: width 0.25s ease;
-    }
-
-    .question-card {
-      position: relative;
-      z-index: 1;
-      background: #ffffff;
-      border: 3px solid var(--line);
-      border-radius: 24px;
-      padding: 22px;
-      margin-bottom: 22px;
-      box-shadow: var(--shadow-sm);
-    }
-
-    .question-head {
-      display: flex;
-      gap: 12px;
-      align-items: flex-start;
-      margin-bottom: 12px;
-    }
-
-    .question-number {
-      width: 42px;
-      height: 42px;
-      border-radius: 999px;
-      border: 3px solid var(--line);
-      background: var(--yellow);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      flex: 0 0 auto;
-      font-weight: 900;
-      box-shadow: 2px 3px 0 rgba(32, 50, 59, 0.18);
-    }
-
-    .question-title {
-      font-size: 1.12rem;
-      font-weight: 900;
-      line-height: 1.6;
-    }
-
-    .options {
-      display: grid;
-      gap: 10px;
-      margin-top: 12px;
-    }
-
-    .option {
-      display: flex;
-      align-items: flex-start;
-      gap: 10px;
-      background: #fffaf0;
-      border: 3px solid var(--line);
-      border-radius: 18px;
+      border-radius: 16px;
       padding: 12px 14px;
-      cursor: pointer;
-      font-weight: 800;
-      transition: transform 0.12s ease, background-color 0.12s ease;
+      font: inherit;
+      background: white;
     }
 
-    .option:hover {
-      background: #fff4bf;
-      transform: translateY(-1px);
-    }
-
-    .option input {
-      transform: translateY(0.45em);
-      accent-color: var(--primary);
-    }
-
-    .option.correct {
-      background: #b9e7b8;
-    }
-
-    .option.wrong {
-      background: #ffd8d5;
-    }
-
-    .option.missed {
-      outline: 4px solid rgba(169, 221, 176, 0.55);
-    }
-
-    .quiz-submit-box {
-      position: sticky;
-      bottom: 14px;
-      z-index: 10;
-      background: rgba(255, 250, 240, 0.92);
-      border: 3px solid var(--line);
-      border-radius: 24px;
-      padding: 16px;
-      box-shadow: var(--shadow-md);
-      backdrop-filter: blur(6px);
-      display: flex;
-      justify-content: space-between;
+    .btn {
+      display: inline-flex;
       align-items: center;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
-
-    .warning-text {
-      color: var(--error);
-      font-weight: 900;
-      margin: 0;
-    }
-
-    #result-section {
-      display: none;
-    }
-
-    .score-panel {
-      position: relative;
-      z-index: 1;
-      background: #ffffff;
-      border: 4px solid var(--line);
-      border-radius: 28px;
-      padding: 26px;
-      box-shadow: var(--shadow-md);
-    }
-
-    .score-big {
-      font-size: clamp(2.3rem, 7vw, 5rem);
-      font-weight: 900;
-      line-height: 1;
-      margin: 10px 0 18px;
-    }
-
-    .score-comment {
-      font-size: 1.15rem;
-      font-weight: 900;
-      margin-bottom: 18px;
-    }
-
-    .summary-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 14px;
-      margin: 18px 0;
-    }
-
-    .summary-item {
-      background: #fffaf0;
+      justify-content: center;
+      gap: 8px;
       border: 3px solid var(--line);
-      border-radius: 18px;
-      padding: 14px;
-      text-align: center;
+      border-radius: 999px;
+      background: var(--yellow);
+      color: var(--ink);
+      padding: 12px 20px;
+      font: inherit;
       font-weight: 900;
+      text-decoration: none;
+      cursor: pointer;
+      box-shadow: 3px 4px 0 rgba(32, 50, 59, 0.18);
     }
 
-    .summary-item span {
-      display: block;
-      font-size: 1.65rem;
-    }
+    .btn:hover { transform: translateY(-1px); }
+    .btn:disabled { background: #d1d5db; color: #6b7280; cursor: not-allowed; transform: none; box-shadow: none; }
+    .btn-blue { background: var(--blue); }
+    .btn-green { background: var(--green); }
+    .btn-pink { background: var(--pink); }
+    .top-actions, .result-actions { display: flex; flex-wrap: wrap; gap: 12px; }
 
-    .review-list {
-      margin-top: 22px;
-      display: grid;
-      gap: 12px;
-    }
+    .progress-wrap { height: 18px; background: white; border: 3px solid var(--line); border-radius: 999px; overflow: hidden; margin: 16px 0 8px; }
+    #progress-bar { width: 0; height: 100%; background: linear-gradient(90deg, var(--blue), var(--green)); transition: width 0.2s ease; }
 
-    .review-item {
-      border: 3px solid var(--line);
-      border-radius: 18px;
-      background: #fffaf0;
-      padding: 14px;
-    }
+    .question-card { background: white; border: 3px solid var(--line); border-radius: 22px; padding: 18px; margin-top: 16px; }
+    .question-head { display: flex; gap: 12px; align-items: flex-start; margin-bottom: 12px; }
+    .question-number { flex: 0 0 auto; width: 42px; height: 42px; border: 3px solid var(--line); border-radius: 999px; display: grid; place-items: center; background: var(--yellow); font-weight: 900; }
+    .question-title { font-size: 1.12rem; font-weight: 900; }
+    .options { display: grid; gap: 10px; }
+    .option { display: flex; gap: 10px; align-items: flex-start; background: #fffaf0; border: 2px solid #eadfcb; border-radius: 16px; padding: 12px; cursor: pointer; }
+    .option:hover { background: #fff4bf; }
+    .option input { transform: translateY(0.45em); accent-color: var(--primary); }
+    .option.correct { background: #b9e7b8; }
+    .option.wrong { background: #ffd8d5; }
 
-    .review-item.pass {
-      background: #eaf7e7;
-    }
+    .quiz-submit-box { margin-top: 20px; padding-top: 18px; border-top: 3px dashed #d7c7a8; }
+    .warning-text { color: var(--error); font-weight: 900; }
+    .sheet-status { margin-top: 8px; color: var(--muted); font-weight: 900; }
+    .sheet-status.ok { color: #2f7d4f; }
+    .sheet-status.error { color: var(--error); }
+    #result-section { display: none; }
 
-    .review-item.fail {
-      background: #ffe9e6;
-    }
+    .score-panel { background: white; border: 4px solid var(--line); border-radius: 26px; padding: 24px; box-shadow: var(--shadow); }
+    .score-big { font-size: clamp(2.5rem, 8vw, 5rem); font-weight: 900; line-height: 1; margin: 10px 0; }
+    .score-comment { font-size: 1.15rem; font-weight: 900; }
+    .summary-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 18px 0; }
+    .summary-item { border: 3px solid var(--line); border-radius: 18px; padding: 14px; background: var(--paper); font-weight: 900; text-align: center; }
+    .summary-item span { display: block; font-size: 1.8rem; }
+    .review-list { display: grid; gap: 12px; margin-top: 18px; }
+    .review-item { border: 3px solid var(--line); border-radius: 18px; padding: 14px; background: var(--paper); }
+    .review-item.pass { border-color: #5d9d64; }
+    .review-item.fail { border-color: #c94a4a; }
+    .review-title { font-weight: 900; margin-bottom: 6px; }
+    .teacher-note { margin-top: 24px; border-top: 3px dashed #d7c7a8; padding-top: 18px; }
 
-    .review-title {
-      font-weight: 900;
-      margin-bottom: 6px;
-    }
+    textarea { width: 100%; min-height: 170px; border: 3px solid var(--line); border-radius: 18px; padding: 14px; font: inherit; resize: vertical; margin: 10px 0 14px; }
 
-    .teacher-note {
-      position: relative;
-      z-index: 1;
-      background: #fff4bf;
-      border: 3px solid var(--line);
-      border-radius: 20px;
-      padding: 16px;
-      box-shadow: var(--shadow-sm);
-      margin-top: 18px;
-    }
-
-    textarea {
-      width: 100%;
-      min-height: 180px;
-      padding: 14px;
-      border: 3px solid var(--line);
-      border-radius: 18px;
-      background: #fffdf7;
-      color: var(--text-main);
-      font-size: 0.95rem;
-      font-weight: 700;
-      line-height: 1.7;
-      resize: vertical;
-    }
-
-    .hide {
-      display: none !important;
-    }
-
-    @media print {
-      body {
-        background: #fff;
-      }
-
-      header,
-      #quiz-section,
-      .result-actions,
-      .top-actions,
-      .teacher-note,
-      .quiz-submit-box {
-        display: none !important;
-      }
-
-      section,
-      .score-panel {
-        box-shadow: none;
-      }
-
-      #result-section {
-        display: block !important;
-      }
-    }
-
-    @media (max-width: 720px) {
-      .container {
-        padding: 18px 12px 40px;
-      }
-
-      header,
-      section {
-        padding: 26px 18px;
-        border-radius: 24px;
-      }
-
-      .student-info,
-      .summary-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .btn {
-        width: 100%;
-        text-align: center;
-      }
-
-      .quiz-submit-box {
-        position: static;
-      }
-    }
+    @media (max-width: 720px) { .student-info, .summary-grid { grid-template-columns: 1fr; } header, section { padding: 20px; } }
+    @media print { body { background: white; } .top-actions, .quiz-submit-box, .result-actions { display: none; } header, section, .score-panel { box-shadow: none; } #result-section { display: block !important; } }
   </style>
 </head>
-
 <body>
   <div class="container">
     <header>
-      <h1>🧪 搜尋演算法小測驗</h1>
-      <p class="subtitle">
-        完成循序搜尋與二元搜尋練習後，請用這份 10 題選擇題檢查自己是否真的理解。
-      </p>
-
+      <h1>搜尋演算法小測驗</h1>
+      <p class="subtitle">複習循序搜尋與二元搜尋的核心觀念。請完成 10 題選擇題，再交卷查看結果。</p>
       <div class="student-info">
-        <div class="field">
-          <label for="student-name">姓名</label>
-          <input type="text" id="student-name" placeholder="請輸入姓名" />
-        </div>
-        <div class="field">
-          <label for="student-class">班級 / 座號</label>
-          <input type="text" id="student-class" placeholder="例如：801 / 12" />
-        </div>
+        <div><label for="student-name">姓名</label><input type="text" id="student-name" placeholder="請輸入姓名" /></div>
+        <div><label for="student-class">班級 / 座號 <span style="color: var(--error);">*</span></label><input type="text" id="student-class" placeholder="例如：80213、802/13、802013" required /></div>
       </div>
-
       <div class="top-actions">
-        <a href="index.html" class="btn">回到互動教室</a>
-        <button class="btn btn-blue" id="start-focus-btn">開始作答</button>
+        <a href="index.html" class="btn">回到首頁</a>
+        <button class="btn btn-blue" id="start-focus-btn" type="button">開始作答</button>
       </div>
     </header>
 
     <section id="quiz-section">
-      <h2>十題選擇題</h2>
-      <p>
-        每題只有一個最適合的答案。作答完成後按下「交卷」，系統會產生分數總結和可複製的評量紀錄。
-      </p>
-
-      <div class="quiz-progress" aria-label="作答進度">
-        <div class="quiz-progress-bar" id="progress-bar"></div>
-      </div>
+      <h2>測驗題目</h2>
+      <p>每題只有一個正確答案。選項會隨機排列，所以請仔細閱讀每個選項。</p>
+      <div class="progress-wrap"><div id="progress-bar"></div></div>
       <p id="progress-text">已完成 0 / 10 題</p>
-
       <form id="quiz-form"></form>
-
       <div class="quiz-submit-box">
         <p class="warning-text" id="quiz-warning">請完成所有題目後再交卷。</p>
-        <button class="btn btn-green" id="submit-btn" type="button">交卷並查看分數</button>
+        <p class="sheet-status" id="sheet-status">成績上傳尚未設定。</p>
+        <button class="btn btn-green" id="submit-btn" type="button">交卷並查看結果</button>
       </div>
     </section>
 
     <section id="result-section">
-      <h2>分數總結</h2>
-
+      <h2>測驗結果</h2>
       <div class="score-panel" id="result-card">
         <div id="result-student">學生：未填寫</div>
         <div class="score-big" id="score-big">0 / 10</div>
         <div class="score-comment" id="score-comment">請先完成測驗。</div>
-
         <div class="summary-grid">
-          <div class="summary-item">
-            正確題數
-            <span id="correct-count">0</span>
-          </div>
-          <div class="summary-item">
-            錯誤題數
-            <span id="wrong-count">0</span>
-          </div>
-          <div class="summary-item">
-            百分比
-            <span id="score-percent">0%</span>
-          </div>
+          <div class="summary-item">答對題數<span id="correct-count">0</span></div>
+          <div class="summary-item">答錯題數<span id="wrong-count">0</span></div>
+          <div class="summary-item">得分比例<span id="score-percent">0%</span></div>
         </div>
-
         <div id="review-list" class="review-list"></div>
       </div>
-
       <div class="teacher-note">
-        <h3>📋 給老師的評量紀錄</h3>
-        <p>可以直接複製下方文字貼到表單、Google Classroom、Line，或按「列印 / 存成 PDF」。</p>
+        <h3>給老師的紀錄</h3>
+        <p>可以複製下方紀錄貼到 Google Classroom、Line，或下載成 TXT 檔保存。</p>
         <textarea id="copy-summary" readonly></textarea>
-
         <div class="result-actions">
-          <button class="btn btn-blue" id="copy-btn">複製評量紀錄</button>
-          <button class="btn btn-pink" id="print-btn">列印 / 存成 PDF</button>
-          <button class="btn" id="download-txt-btn">下載 TXT 紀錄</button>
-          <button class="btn btn-green" id="retry-btn">重新作答</button>
+          <button class="btn btn-blue" id="copy-btn" type="button">複製紀錄</button>
+          <button class="btn btn-pink" id="print-btn" type="button">列印 / 存成 PDF</button>
+          <button class="btn" id="download-txt-btn" type="button">下載 TXT 紀錄</button>
+          <button class="btn btn-green" id="retry-btn" type="button">重新作答</button>
         </div>
       </div>
     </section>
   </div>
 
   <script>
+    const GOOGLE_SHEET_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyXVYURzQipCNh0u78cRGgEUXxAunIbA7GU_ihHZZxc-DL848oOYksQb4RpUOGJQ_1-/exec"; // 貼上 Apps Script Web App URL 後，交卷會自動上傳。
+
     const questions = [
-      {
-        question: "循序搜尋最主要的做法是什麼？",
-        options: [
-          "先把資料切成兩半，再決定往哪邊找",
-          "從第一筆開始，一筆一筆往後檢查",
-          "先把所有資料刪掉，再重新建立",
-          "只檢查最後一筆資料"
-        ],
-        answer: 1,
-        explain: "循序搜尋就是從頭開始，一個一個檢查，直到找到或全部檢查完。"
-      },
-      {
-        question: "二元搜尋要正確使用，最重要的前提是什麼？",
-        options: [
-          "資料必須先排序",
-          "資料一定要是偶數筆",
-          "資料一定要全部相同",
-          "資料不能超過 10 筆"
-        ],
-        answer: 0,
-        explain: "二元搜尋能每次排除一半，是因為資料已經照順序排列。"
-      },
-      {
-        question: "在二元搜尋中，L、R、M 分別代表什麼？",
-        options: [
-          "左邊界、右邊界、中間位置",
-          "長度、隨機值、最大值",
-          "清單、角色、訊息",
-          "小於、重複、移動"
-        ],
-        answer: 0,
-        explain: "L 是左邊界，R 是右邊界，M 是目前搜尋範圍的中間位置。"
-      },
-      {
-        question: "循序搜尋中，變數 i 通常用來做什麼？",
-        options: [
-          "記錄目前檢查到清單的第幾項",
-          "記錄角色的大小",
-          "記錄二元搜尋的右邊界",
-          "記錄答案是否排序"
-        ],
-        answer: 0,
-        explain: "i 是索引，用來表示目前正在檢查清單中的哪一個位置。"
-      },
-      {
-        question: "如果循序搜尋檢查到「資料清單第 i 項 = 目標數字」，接下來最合理的是什麼？",
-        options: [
-          "繼續把剩下的資料全部檢查完",
-          "說出找到的位置，並停止腳本",
-          "把 i 設為 0",
-          "把清單全部排序"
-        ],
-        answer: 1,
-        explain: "找到目標後就可以回報位置並停止，不需要再繼續搜尋。"
-      },
-      {
-        question: "二元搜尋中，如果「資料清單第 M 項 < 目標數字」，代表什麼？",
-        options: [
-          "目標可能在左半邊，所以 R = M - 1",
-          "目標可能在右半邊，所以 L = M + 1",
-          "目標一定不存在",
-          "M 應該設為 1"
-        ],
-        answer: 1,
-        explain: "中間值比目標小，代表左半邊和中間值都太小，要往右半邊找。"
-      },
-      {
-        question: "二元搜尋中，如果 L > R，通常代表什麼？",
-        options: [
-          "找到答案了",
-          "搜尋範圍已經空了，找不到目標",
-          "資料還沒排序完成",
-          "應該把目標數字變大"
-        ],
-        answer: 1,
-        explain: "當 L 跑到 R 右邊，表示已經沒有可搜尋的範圍。"
-      },
-      {
-        question: "下列哪一種情況比較適合用循序搜尋？",
-        options: [
-          "資料很多，而且已經排序",
-          "資料沒有排序，或資料量很少",
-          "資料一定是 1000 筆以上",
-          "資料只能有 2 筆"
-        ],
-        answer: 1,
-        explain: "資料少或未排序時，循序搜尋直覺可靠，不需要先排序。"
-      },
-      {
-        question: "為什麼二元搜尋通常比循序搜尋快？",
-        options: [
-          "因為它每次都可以排除一半的搜尋範圍",
-          "因為它不需要比較資料",
-          "因為它可以不用清單",
-          "因為它一定第一步就找到答案"
-        ],
-        answer: 0,
-        explain: "二元搜尋的威力在於每一輪都能讓搜尋範圍大幅縮小。"
-      },
-      {
-        question: "如果一組資料是 [56, 12, 89, 34, 7]，要直接找某個數字，最安全的搜尋法是什麼？",
-        options: [
-          "二元搜尋，因為它一定最快",
-          "循序搜尋，因為資料還沒有排序",
-          "兩種都不能用",
-          "只看中間那一個就好"
-        ],
-        answer: 1,
-        explain: "這組資料沒有排序，直接使用二元搜尋可能會往錯方向排除。"
-      }
+      { question: "循序搜尋最主要的做法是什麼？", options: ["先把資料切成兩半，再決定往哪邊找", "從第一筆開始，一筆一筆往後檢查", "先把所有資料刪掉，再重新建立", "只檢查最後一筆資料"], answer: 1, explain: "循序搜尋就是從頭開始，一個一個檢查，直到找到或全部檢查完。" },
+      { question: "二元搜尋要正確使用，最重要的前提是什麼？", options: ["資料必須先排序", "資料一定要是偶數筆", "資料一定要全部相同", "資料不能超過 10 筆"], answer: 0, explain: "二元搜尋能每次排除一半，是因為資料已經照順序排列。" },
+      { question: "在二元搜尋中，L、R、M 分別代表什麼？", options: ["左邊界、右邊界、中間位置", "長度、隨機值、最大值", "清單、角色、訊息"], answer: 0, explain: "L 是左邊界，R 是右邊界，M 是目前搜尋範圍的中間位置。" },
+      { question: "循序搜尋中，變數 i 通常用來做什麼？", options: ["記錄目前檢查到清單的第幾項", "記錄角色的大小", "記錄二元搜尋的右邊界", "記錄答案是否排序"], answer: 0, explain: "i 是索引，用來表示目前正在檢查清單中的哪一個位置。" },
+      { question: "如果循序搜尋檢查到「資料清單第 i 項 = 目標數字」，接下來最合理的是什麼？", options: ["繼續把剩下的資料全部檢查完", "說出找到的位置，並停止腳本", "把 i 設為 0", "把清單全部排序"], answer: 1, explain: "找到目標後就可以回報位置並停止，不需要再繼續搜尋。" },
+      { question: "二元搜尋中，如果「資料清單第 M 項 < 目標數字」，代表什麼？", options: ["目標可能在左半邊，所以 R = M - 1", "目標可能在右半邊，所以 L = M + 1", "目標一定不存在", "M 應該設為 1"], answer: 1, explain: "中間值比目標小，代表左半邊和中間值都太小，要往右半邊找。" },
+      { question: "二元搜尋中，如果 L > R，通常代表什麼？", options: ["找到答案了", "搜尋範圍已經空了，找不到目標", "資料還沒排序完成", "應該把目標數字變大"], answer: 1, explain: "當 L 跑到 R 右邊，表示已經沒有可搜尋的範圍。" },
+      { question: "下列哪一種情況比較適合用循序搜尋？", options: ["資料很多，而且已經排序", "資料沒有排序，或資料量很少", "資料一定是 1000 筆以上", "資料只能有 2 筆"], answer: 1, explain: "資料少或未排序時，循序搜尋直覺可靠，不需要先排序。" },
+      { question: "為什麼二元搜尋通常比循序搜尋快？", options: ["因為它每次都可以排除一半的搜尋範圍", "因為它不需要比較資料", "因為它可以不用清單", "因為它一定第一步就找到答案"], answer: 0, explain: "二元搜尋的威力在於每一輪都能讓搜尋範圍大幅縮小。" },
+      { question: "如果一組資料是 [56, 12, 89, 34, 7]，要直接找某個數字，最安全的搜尋法是什麼？", options: ["二元搜尋，因為它一定最快", "循序搜尋，因為資料還沒有排序", "兩種都不能用", "只看中間那一個就好"], answer: 1, explain: "這組資料沒有排序，直接使用二元搜尋可能會往錯方向排除。" }
     ];
 
     const form = document.getElementById("quiz-form");
     const progressBar = document.getElementById("progress-bar");
     const progressText = document.getElementById("progress-text");
     const warning = document.getElementById("quiz-warning");
+    const sheetStatus = document.getElementById("sheet-status");
+    const submitButton = document.getElementById("submit-btn");
+    let submitted = false;
+
+    function shuffleArray(array) {
+      return array.map(item => ({ item, sort: Math.random() })).sort((a, b) => a.sort - b.sort).map(({ item }) => item);
+    }
+
+    function randomizeQuestionOptions() {
+      questions.forEach(q => {
+        const oldAnswerText = q.options[q.answer];
+        q.options = shuffleArray(q.options);
+        q.answer = q.options.indexOf(oldAnswerText);
+      });
+    }
+
+    function letter(index) { return String.fromCharCode(65 + index); }
+    function parseClassSeat(rawValue) {
+      const raw = rawValue.trim();
+      const separated = raw.match(/^(\d{3})\D+(\d{1,3})$/);
+      const compact = raw.replace(/\D/g, "");
+      let classNumber = "";
+      let seatNumber = "";
+
+      if (separated) {
+        classNumber = separated[1];
+        seatNumber = String(Number(separated[2]));
+      } else if (compact.length >= 5) {
+        classNumber = compact.slice(0, 3);
+        seatNumber = String(Number(compact.slice(3)));
+      }
+
+      if (!/^\d{3}$/.test(classNumber) || !/^\d+$/.test(seatNumber) || Number(seatNumber) <= 0) {
+        return null;
+      }
+
+      return { classNumber, seatNumber, display: `${classNumber} / ${seatNumber}` };
+    }
 
     function renderQuiz() {
       form.innerHTML = questions.map((q, index) => `
         <div class="question-card" id="q-card-${index}">
-          <div class="question-head">
-            <div class="question-number">${index + 1}</div>
-            <div class="question-title">${q.question}</div>
-          </div>
+          <div class="question-head"><div class="question-number">${index + 1}</div><div class="question-title">${q.question}</div></div>
           <div class="options">
             ${q.options.map((option, optIndex) => `
               <label class="option" for="q${index}-${optIndex}">
                 <input type="radio" name="q${index}" id="q${index}-${optIndex}" value="${optIndex}" />
-                <span>${String.fromCharCode(65 + optIndex)}. ${option}</span>
+                <span>${letter(optIndex)}. ${option}</span>
               </label>
             `).join("")}
           </div>
         </div>
       `).join("");
-
-      form.addEventListener("change", updateProgress);
     }
 
     function getAnswers() {
@@ -727,9 +274,17 @@
     }
 
     function gradeQuiz() {
+      if (submitted) return;
+
+      const classSeat = parseClassSeat(document.getElementById("student-class").value);
+      if (!classSeat) {
+        warning.textContent = "請輸入班級座號，例如 80213、802/13，或 802013。";
+        document.getElementById("student-class").focus();
+        return;
+      }
+
       const answers = getAnswers();
       const unanswered = answers.findIndex(answer => answer === null);
-
       if (unanswered !== -1) {
         document.getElementById(`q-card-${unanswered}`).scrollIntoView({ behavior: "smooth", block: "center" });
         warning.textContent = `第 ${unanswered + 1} 題還沒作答。`;
@@ -737,99 +292,109 @@
       }
 
       let correct = 0;
-
       questions.forEach((q, index) => {
         const selected = answers[index];
         if (selected === q.answer) correct++;
-
-        const labels = document.querySelectorAll(`#q-card-${index} .option`);
-        labels.forEach((label, optIndex) => {
-          label.classList.remove("correct", "wrong", "missed");
+        document.querySelectorAll(`#q-card-${index} .option`).forEach((label, optIndex) => {
+          label.classList.remove("correct", "wrong");
           if (optIndex === q.answer) label.classList.add("correct");
           if (optIndex === selected && selected !== q.answer) label.classList.add("wrong");
         });
       });
 
+      submitted = true;
+      submitButton.disabled = true;
+      submitButton.textContent = "已交卷";
       renderResult(answers, correct);
       document.getElementById("result-section").style.display = "block";
       document.getElementById("result-section").scrollIntoView({ behavior: "smooth" });
     }
 
-    function renderResult(answers, correct) {
+    function buildResultPayload(answers, correct) {
       const total = questions.length;
       const percent = Math.round((correct / total) * 100);
       const wrong = total - correct;
-
       const name = document.getElementById("student-name").value.trim() || "未填寫";
-      const classInfo = document.getElementById("student-class").value.trim() || "未填寫";
-      const now = new Date();
-      const timeText = now.toLocaleString("zh-TW");
-
-      let comment = "";
-      if (percent >= 90) {
-        comment = "非常完整！你已經能清楚分辨循序搜尋與二元搜尋。";
-      } else if (percent >= 70) {
-        comment = "理解不錯！建議再複習二元搜尋的 L、R、M 更新。";
-      } else if (percent >= 50) {
-        comment = "有基本概念，但還需要再練習判斷搜尋條件。";
-      } else {
-        comment = "建議回到互動教室重新操作動畫，再完成 Scratch 練習。";
-      }
-
-      document.getElementById("result-student").textContent = `學生：${name}　班級 / 座號：${classInfo}　時間：${timeText}`;
-      document.getElementById("score-big").textContent = `${correct} / ${total}`;
-      document.getElementById("score-comment").textContent = comment;
-      document.getElementById("correct-count").textContent = correct;
-      document.getElementById("wrong-count").textContent = wrong;
-      document.getElementById("score-percent").textContent = `${percent}%`;
-
-      const reviewList = document.getElementById("review-list");
-      reviewList.innerHTML = questions.map((q, index) => {
-        const selected = answers[index];
-        const isCorrect = selected === q.answer;
-        return `
-          <div class="review-item ${isCorrect ? "pass" : "fail"}">
-            <div class="review-title">
-              ${isCorrect ? "✅" : "❌"} 第 ${index + 1} 題：${q.question}
-            </div>
-            <div>你的答案：${String.fromCharCode(65 + selected)}. ${q.options[selected]}</div>
-            <div>正確答案：${String.fromCharCode(65 + q.answer)}. ${q.options[q.answer]}</div>
-            <div>說明：${q.explain}</div>
-          </div>
-        `;
-      }).join("");
-
+      const classSeat = parseClassSeat(document.getElementById("student-class").value) || { classNumber: "", seatNumber: "", display: "未填寫" };
+      const classInfo = classSeat.display;
+      const timeText = new Date().toLocaleString("zh-TW");
+      const wrongQuestions = questions
+        .map((q, index) => ({ q, index, selected: answers[index] }))
+        .filter(item => item.selected !== item.q.answer)
+        .map(item => ({
+          number: item.index + 1,
+          question: item.q.question,
+          studentAnswer: `${letter(item.selected)}. ${item.q.options[item.selected]}`,
+          correctAnswer: `${letter(item.q.answer)}. ${item.q.options[item.q.answer]}`,
+          explain: item.q.explain
+        }));
       const summary = [
         "搜尋演算法小測驗評量紀錄",
         "------------------------------",
         `姓名：${name}`,
         `班級 / 座號：${classInfo}`,
-        `作答時間：${timeText}`,
-        `分數：${correct} / ${total}（${percent}%）`,
-        `評語：${comment}`,
+        `時間：${timeText}`,
+        `成績：${correct} / ${total}（${percent}%）`,
         "",
         "逐題結果：",
         ...questions.map((q, index) => {
           const selected = answers[index];
           const isCorrect = selected === q.answer;
-          return `第 ${index + 1} 題：${isCorrect ? "正確" : "錯誤"}｜學生答案 ${String.fromCharCode(65 + selected)}｜正確答案 ${String.fromCharCode(65 + q.answer)}`;
+          return `第 ${index + 1} 題：${isCorrect ? "正確" : "錯誤"}｜學生答案 ${letter(selected)}｜正確答案 ${letter(q.answer)}｜${q.question}`;
         })
       ].join("\n");
+      return { quizTitle: "搜尋演算法小測驗", name, classInfo, classNumber: classSeat.classNumber, seatNumber: classSeat.seatNumber, timeText, correct, wrong, total, percent, wrongQuestions, summary };
+    }
 
-      document.getElementById("copy-summary").value = summary;
+    function renderResult(answers, correct) {
+      const payload = buildResultPayload(answers, correct);
+      let comment = "";
+      if (payload.percent >= 90) comment = "非常完整！你已經能清楚分辨循序搜尋與二元搜尋。";
+      else if (payload.percent >= 70) comment = "理解不錯！建議再複習二元搜尋的 L、R、M 更新。";
+      else comment = "還可以再加強，建議先從循序搜尋和二元搜尋的差異開始複習。";
+
+      document.getElementById("result-student").textContent = `學生：${payload.name}｜班級 / 座號：${payload.classInfo}｜時間：${payload.timeText}`;
+      document.getElementById("score-big").textContent = `${payload.correct} / ${payload.total}`;
+      document.getElementById("score-comment").textContent = comment;
+      document.getElementById("correct-count").textContent = payload.correct;
+      document.getElementById("wrong-count").textContent = payload.wrong;
+      document.getElementById("score-percent").textContent = `${payload.percent}%`;
+      document.getElementById("copy-summary").value = payload.summary;
+      document.getElementById("review-list").innerHTML = questions.map((q, index) => {
+        const selected = answers[index];
+        const isCorrect = selected === q.answer;
+        return `<div class="review-item ${isCorrect ? "pass" : "fail"}"><div class="review-title">${isCorrect ? "✓" : "✕"} 第 ${index + 1} 題：${q.question}</div><div>你的答案：${letter(selected)}. ${q.options[selected]}</div><div>正確答案：${letter(q.answer)}. ${q.options[q.answer]}</div><div>說明：${q.explain}</div></div>`;
+      }).join("");
+      submitToGoogleSheet(payload);
+    }
+
+    async function submitToGoogleSheet(payload) {
+      if (!GOOGLE_SHEET_WEB_APP_URL) {
+        sheetStatus.textContent = "成績上傳尚未設定：請先貼上 Apps Script Web App URL。";
+        sheetStatus.className = "sheet-status";
+        return;
+      }
+      sheetStatus.textContent = "成績正在上傳到 Google 試算表...";
+      sheetStatus.className = "sheet-status";
+      try {
+        await fetch(GOOGLE_SHEET_WEB_APP_URL, {
+          method: "POST",
+          mode: "no-cors",
+          headers: { "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8" },
+          body: new URLSearchParams({ payload: JSON.stringify(payload) })
+        });
+        sheetStatus.textContent = "成績已送出到 Google 試算表。";
+        sheetStatus.className = "sheet-status ok";
+      } catch (error) {
+        sheetStatus.textContent = "成績上傳失敗，請先使用複製或下載紀錄備份。";
+        sheetStatus.className = "sheet-status error";
+      }
     }
 
     async function copySummary() {
       const text = document.getElementById("copy-summary").value;
-
-      try {
-        await navigator.clipboard.writeText(text);
-        alert("已複製評量紀錄！");
-      } catch (error) {
-        document.getElementById("copy-summary").select();
-        document.execCommand("copy");
-        alert("已嘗試複製。若沒有成功，請手動選取文字複製。");
-      }
+      try { await navigator.clipboard.writeText(text); alert("已複製評量紀錄！"); }
+      catch (error) { document.getElementById("copy-summary").select(); document.execCommand("copy"); alert("已選取並嘗試複製紀錄。"); }
     }
 
     function downloadTxt() {
@@ -846,28 +411,30 @@
     }
 
     function retryQuiz() {
-      document.querySelectorAll("input[type='radio']").forEach(input => {
-        input.checked = false;
-      });
-      document.querySelectorAll(".option").forEach(option => {
-        option.classList.remove("correct", "wrong", "missed");
-      });
+      submitted = false;
+      submitButton.disabled = false;
+      submitButton.textContent = "交卷並查看結果";
       document.getElementById("result-section").style.display = "none";
+      sheetStatus.textContent = GOOGLE_SHEET_WEB_APP_URL ? "交卷後會自動上傳成績。" : "成績上傳尚未設定。";
+      sheetStatus.className = "sheet-status";
+      randomizeQuestionOptions();
+      renderQuiz();
       updateProgress();
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
+    form.addEventListener("change", updateProgress);
     document.getElementById("submit-btn").addEventListener("click", gradeQuiz);
     document.getElementById("copy-btn").addEventListener("click", copySummary);
     document.getElementById("print-btn").addEventListener("click", () => window.print());
     document.getElementById("download-txt-btn").addEventListener("click", downloadTxt);
     document.getElementById("retry-btn").addEventListener("click", retryQuiz);
-    document.getElementById("start-focus-btn").addEventListener("click", () => {
-      document.getElementById("quiz-section").scrollIntoView({ behavior: "smooth" });
-    });
+    document.getElementById("start-focus-btn").addEventListener("click", () => document.getElementById("quiz-section").scrollIntoView({ behavior: "smooth" }));
 
+    randomizeQuestionOptions();
     renderQuiz();
     updateProgress();
+    sheetStatus.textContent = GOOGLE_SHEET_WEB_APP_URL ? "交卷後會自動上傳成績。" : "成績上傳尚未設定。";
   </script>
 </body>
 </html>
